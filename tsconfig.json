@@ -8,7 +8,7 @@
     "removeComments": true,
     "strictNullChecks": true,
 
-    "outDir": "lib"
+    "outDir": "dist"
   },
   "include": [
     "src/**/*.ts"
