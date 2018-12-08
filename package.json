@@ -1,0 +1,26 @@
+{
+  "name": "node-tagged-cache",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "format:fix": "prettier --write src/**/*.ts benchmarks/**/*.js",
+    "format:list": "prettier -l src/**/*.ts benchmarks/**/*.js"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run build && npm run format:fix && git add .",
+      "post-commit": "git update-index -g"
+    }
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "jest": "^23.6.0",
+    "prettier": "^1.15.3",
+    "@types/jest": "^23.3.10",
+    "husky": "^1.2.0",
+    "ts-jest": "^23.10.5",
+    "typescript": "^3.2.2"
+  }
+}

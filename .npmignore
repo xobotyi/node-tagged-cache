@@ -1,0 +1,9 @@
+src/
+benchmarks/
+coverage/
+tests/
+.idea/
+.gitignore
+.npmignore
+tsconfig.json
+jest.config.js
