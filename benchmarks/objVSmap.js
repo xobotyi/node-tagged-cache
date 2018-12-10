@@ -35,211 +35,184 @@ const generateKV = () => {
   return res;
 };
 
+const benchResults = {
+  obj: {},
+  objV2: {},
+  map: {}
+};
+
 Promise.resolve()
+  // Object v1
   .then(() => {
-    process.stdout.write("`set` (1M rounds)\n");
-  })
-  .then(() => {
-    process.stdout.write(`\tObject:`);
+    process.stdout.write(`\rObject [set]`);
     const obj = populateObject();
     const valuesToSet = generateKV();
 
     return measurePerformance(() => {
-      valuesToSet.map(pair => {
+      for (let pair of valuesToSet) {
         obj[pair[0]] = pair[1];
-      });
+      }
     });
   })
   .then(results => {
-    process.stdout.write(
-      `\r\tObject:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
+    benchResults.obj.set = ~~results.ops;
   })
   .then(() => {
-    process.stdout.write(`\tObject v2:`);
-    const obj = populateObjectV2();
-    const valuesToSet = generateKV();
-
-    return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        obj[pair[0]] = pair[1];
-      });
-    });
-  })
-  .then(results => {
-    process.stdout.write(
-      `\r\tObject v2:\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
-  })
-  .then(() => {
-    process.stdout.write(`\tMap:`);
-    const map = populateMap();
-    const valuesToSet = generateKV();
-
-    return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        map.set(pair[0], pair[1]);
-      });
-    });
-  })
-  .then(results => {
-    process.stdout.write(
-      `\r\tMap:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
-  })
-  .then(() => {
-    process.stdout.write("\n`get` (1M rounds)\n");
-  })
-  .then(() => {
-    process.stdout.write(`\tObject:`);
+    process.stdout.write(`\rObject [get]    `);
     const obj = populateObject();
     const valuesToSet = generateKV();
 
     return measurePerformance(() => {
-      valuesToSet.map(pair => {
+      for (let pair of valuesToSet) {
         obj[pair[0]];
-      });
+      }
     });
   })
   .then(results => {
-    process.stdout.write(
-      `\r\tObject:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
+    benchResults.obj.get = ~~results.ops;
   })
   .then(() => {
-    process.stdout.write(`\tObject v2:`);
-    const obj = populateObjectV2();
-    const valuesToSet = generateKV();
-
-    return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        obj[pair[0]];
-      });
-    });
-  })
-  .then(results => {
-    process.stdout.write(
-      `\r\tObject v2:\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
-  })
-  .then(() => {
-    process.stdout.write(`\tMap:`);
-    const map = populateMap();
-    const valuesToSet = generateKV();
-
-    return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        map.get(pair[0]);
-      });
-    });
-  })
-  .then(results => {
-    process.stdout.write(
-      `\r\tMap:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
-  })
-  .then(() => {
-    process.stdout.write("\n`entry existence check` (1M rounds)\n");
-  })
-  .then(() => {
-    process.stdout.write(`\tObject:`);
+    process.stdout.write(`\rObject [check]    `);
     const obj = populateObject();
     const valuesToSet = generateKV();
 
     return measurePerformance(() => {
-      valuesToSet.map(pair => {
+      for (let pair of valuesToSet) {
         typeof obj[pair[0]] !== "undefined";
-      });
+      }
     });
   })
   .then(results => {
-    process.stdout.write(
-      `\r\tObject:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
+    benchResults.obj.check = ~~results.ops;
   })
   .then(() => {
-    process.stdout.write(`\tObject v2:`);
-    const obj = populateObjectV2();
-    const valuesToSet = generateKV();
-
-    return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        Boolean(obj[pair[0]]);
-      });
-    });
-  })
-  .then(results => {
-    process.stdout.write(
-      `\r\tObject v2:\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
-  })
-  .then(() => {
-    process.stdout.write(`\tMap:`);
-    const map = populateMap();
-    const valuesToSet = generateKV();
-
-    return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        map.has(pair[0]);
-      });
-    });
-  })
-  .then(results => {
-    process.stdout.write(
-      `\r\tMap:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
-  })
-  .then(() => {
-    process.stdout.write("\n`delete` (1M rounds)\n");
-  })
-  .then(() => {
-    process.stdout.write(`\tObject:`);
+    process.stdout.write(`\rObject [delete]    `);
     const obj = populateObject();
     const valuesToSet = generateKV();
 
     return measurePerformance(() => {
-      valuesToSet.map(pair => {
+      for (let pair of valuesToSet) {
         delete obj[pair[0]];
-      });
+      }
     });
   })
   .then(results => {
-    process.stdout.write(
-      `\r\tObject:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
+    benchResults.obj.delete = ~~results.ops;
   })
+  // Object v2
   .then(() => {
-    process.stdout.write(`\tObject v2:`);
+    process.stdout.write(`\rObject Ver.2 [set]    `);
     const obj = populateObjectV2();
     const valuesToSet = generateKV();
 
     return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        obj[pair[0]] = null;
-      });
+      for (let pair of valuesToSet) {
+        obj[pair[0]] = pair[1];
+      }
     });
   })
   .then(results => {
-    process.stdout.write(
-      `\r\tObject v2:\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
+    benchResults.objV2.set = ~~results.ops;
   })
   .then(() => {
-    process.stdout.write(`\tMap:`);
+    process.stdout.write(`\rObject Ver.2 [get]    `);
+    const obj = populateObjectV2();
+    const valuesToSet = generateKV();
+
+    return measurePerformance(() => {
+      for (let pair of valuesToSet) {
+        obj[pair[0]];
+      }
+    });
+  })
+  .then(results => {
+    benchResults.objV2.get = ~~results.ops;
+  })
+  .then(() => {
+    process.stdout.write(`\rObject Ver.2 [check]    `);
+    const obj = populateObjectV2();
+    const valuesToSet = generateKV();
+
+    return measurePerformance(() => {
+      for (let pair of valuesToSet) {
+        !!obj[pair[0]];
+      }
+    });
+  })
+  .then(results => {
+    benchResults.objV2.check = ~~results.ops;
+  })
+  .then(() => {
+    process.stdout.write(`\rObject Ver.2 [delete]    `);
+    const obj = populateObjectV2();
+    const valuesToSet = generateKV();
+
+    return measurePerformance(() => {
+      for (let pair of valuesToSet) {
+        delete obj[pair[0]];
+      }
+    });
+  })
+  .then(results => {
+    benchResults.objV2.delete = ~~results.ops;
+  })
+  .then(() => {
+    process.stdout.write(`\rObject Map [set]    `);
     const map = populateMap();
     const valuesToSet = generateKV();
 
     return measurePerformance(() => {
-      valuesToSet.map(pair => {
-        map.delete(pair[0]);
-      });
+      for (let pair of valuesToSet) {
+        map.set(pair[0], pair[1]);
+      }
     });
   })
   .then(results => {
-    process.stdout.write(
-      `\r\tMap:\t\t${results.elapsed}ms (${~~results.ops} OPS)\n`
-    );
+    benchResults.map.set = ~~results.ops;
   })
   .then(() => {
-    console.log("All tests are done!");
+    process.stdout.write(`\rObject Map [get]    `);
+    const map = populateMap();
+    const valuesToSet = generateKV();
+
+    return measurePerformance(() => {
+      for (let pair of valuesToSet) {
+        map.get(pair[0]);
+      }
+    });
+  })
+  .then(results => {
+    benchResults.map.get = ~~results.ops;
+  })
+  .then(() => {
+    process.stdout.write(`\rObject Map [check]    `);
+    const map = populateMap();
+    const valuesToSet = generateKV();
+
+    return measurePerformance(() => {
+      for (let pair of valuesToSet) {
+        map.has(pair[0]);
+      }
+    });
+  })
+  .then(results => {
+    benchResults.map.check = ~~results.ops;
+  })
+  .then(() => {
+    process.stdout.write(`\rObject Map [delete]    `);
+    const map = populateMap();
+    const valuesToSet = generateKV();
+
+    return measurePerformance(() => {
+      for (let pair of valuesToSet) {
+        map.delete(pair[0]);
+      }
+    });
+  })
+  .then(results => {
+    benchResults.map.delete = ~~results.ops;
+  })
+  .then(() => {
+    process.stdout.write(`\r\n`);
+    console.table(benchResults);
   });
