@@ -23,7 +23,7 @@
     "local"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rimraf dist/ && tsc",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "format:fix": "prettier --write src/**/*.ts benchmarks/**/*.js",
@@ -37,11 +37,14 @@
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.12",
+    "husky": "^1.2.0",
     "jest": "^23.6.0",
     "prettier": "^1.15.3",
-    "@types/jest": "^23.3.10",
-    "husky": "^1.2.0",
+    "rimraf": "^2.6.2",
     "ts-jest": "^23.10.5",
     "typescript": "^3.2.2"
-  }
+  },
+  "webSocketDebuggerUrl": "ws://127.0.0.1:9229/d270c0dd-6de4-4ced-ae66-7469a15f1d97"
 }

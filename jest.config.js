@@ -3,4 +3,7 @@ module.exports = {
     testEnvironment: 'node',
 
     coverageDirectory: "coverage",
+    roots:             [
+        "tests",
+    ],
 };

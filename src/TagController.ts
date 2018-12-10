@@ -1,50 +1,60 @@
+import timestamp from "./timestamp";
+
 export type TagVersion = number;
 
-export interface TagVersionList {
+export type TagsList = string[];
+
+export interface TagsVersionsList {
   [name: string]: TagVersion;
 }
 
-export default class TagController {
-  private storage = Object.create(null);
+export class TagController {
+  private storage: Map<string, TagVersion> = new Map();
 
-  public drop(tagName: string): TagVersion;
-  public drop(tagName: string[]): TagVersionList;
-  public drop(tagName: string | string[]): TagVersion | TagVersionList {
-    const now = Date.now();
-    if (typeof tagName === "string") {
-      return (this.storage[tagName] = now);
-    }
+  public drop(tagName: string): TagVersion {
+    const now = timestamp();
+    this.storage.set(tagName, now);
+    return now;
+  }
 
-    const result: TagVersionList = {};
+  public mdrop(tagNames: string[]): TagsVersionsList {
+    const result: TagsVersionsList = {};
+    const now = timestamp();
 
-    for (let tag of tagName) {
-      result[tag] = this.storage[tag] = now;
+    for (let tagName of tagNames) {
+      this.storage.set(tagName, now);
+      result[tagName] = now;
     }
 
     return result;
   }
 
-  public getVersion(tagName: string): TagVersion;
-  public getVersion(tagName: string[]): TagVersionList;
-  public getVersion(tagName: string | string[]): TagVersion | TagVersionList {
-    const now = Date.now();
+  public get(tagName: string): TagVersion {
+    let version = this.storage.get(tagName);
 
-    if (typeof tagName === "string") {
-      return this.storage[tagName] || (this.storage[tagName] = now);
-    }
+    !version && (version = timestamp()) && this.storage.set(tagName, version);
 
-    const result: TagVersionList = {};
+    return version;
+  }
 
-    for (let tag of tagName) {
-      result[tag] = this.storage[tag] || (this.storage[tag] = now);
+  public mget(tagNames: string[]): TagsVersionsList {
+    const result: TagsVersionsList = {};
+    const now = timestamp();
+
+    for (let tagName of tagNames) {
+      let version = this.storage.get(tagName);
+
+      !version && (version = now) && this.storage.set(tagName, version);
+
+      result[tagName] = version;
     }
 
     return result;
   }
 
-  public validate(tagsVersions: TagVersionList): boolean {
-    for (let tag of Object.getOwnPropertyNames(tagsVersions)) {
-      if (tagsVersions[tag] !== this.storage[tag]) {
+  public validate(tagsVersions: TagsVersionsList): boolean {
+    for (const tagName in tagsVersions) {
+      if (tagsVersions[tagName] !== this.storage.get(tagName)) {
         return false;
       }
     }

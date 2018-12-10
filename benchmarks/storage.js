@@ -2,6 +2,10 @@ const measurePerformance = require("./measurePerformance");
 
 process.stdout.write("====\nObject vs Map\n====\n\n");
 
+function rand(min, max) {
+  return min + Math.floor(Math.random() * (max - min + 1));
+}
+
 const populateObject = () => {
   const obj = {};
   for (let i = 0; i < 100000; i++) {
@@ -28,7 +32,7 @@ const generateKV = () => {
   const res = [];
 
   for (let i = 0; i < 5; i++) {
-    let num = Math.random() * 100000;
+    let num = rand(0, 100000);
     res.push(["someKey" + num, "someValue" + num]);
   }
 
@@ -55,7 +59,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.obj.set = ~~results.ops;
+    benchResults.obj.set = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject [get]    `);
@@ -69,7 +73,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.obj.get = ~~results.ops;
+    benchResults.obj.get = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject [check]    `);
@@ -83,7 +87,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.obj.check = ~~results.ops;
+    benchResults.obj.check = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject [delete]    `);
@@ -97,7 +101,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.obj.delete = ~~results.ops;
+    benchResults.obj.delete = measurePerformance.formatOPS(results);
   })
   // Object v2
   .then(() => {
@@ -112,7 +116,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.objV2.set = ~~results.ops;
+    benchResults.objV2.set = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Ver.2 [get]    `);
@@ -126,7 +130,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.objV2.get = ~~results.ops;
+    benchResults.objV2.get = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Ver.2 [check]    `);
@@ -140,7 +144,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.objV2.check = ~~results.ops;
+    benchResults.objV2.check = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Ver.2 [delete]    `);
@@ -154,7 +158,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.objV2.delete = ~~results.ops;
+    benchResults.objV2.delete = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Map [set]    `);
@@ -168,7 +172,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.map.set = ~~results.ops;
+    benchResults.map.set = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Map [get]    `);
@@ -182,7 +186,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.map.get = ~~results.ops;
+    benchResults.map.get = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Map [check]    `);
@@ -196,7 +200,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.map.check = ~~results.ops;
+    benchResults.map.check = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\rObject Map [delete]    `);
@@ -210,7 +214,7 @@ Promise.resolve()
     });
   })
   .then(results => {
-    benchResults.map.delete = ~~results.ops;
+    benchResults.map.delete = measurePerformance.formatOPS(results);
   })
   .then(() => {
     process.stdout.write(`\r\n`);
