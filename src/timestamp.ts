@@ -19,6 +19,7 @@ let _timestampSyncTimeout: Timeout | undefined;
 
 function timestampSync(): void {
   _timestamp = Date.now();
+
   if (_timestampSyncEnabled) {
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     _timestampSyncTimeout = setTimeout(timestampSync, _timestampSyncInterval);
@@ -28,20 +29,12 @@ function timestampSync(): void {
 timestampSync();
 
 export function disableTimestampCache(): void {
-  if (!_timestampSyncEnabled) {
-    return;
-  }
-
   _timestampSyncEnabled = false;
   _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
   _timestampSyncTimeout = undefined;
 }
 
 export function enableTimestampCache(): void {
-  if (_timestampSyncEnabled) {
-    return;
-  }
-
   _timestampSyncEnabled = true;
   _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
 

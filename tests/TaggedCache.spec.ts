@@ -41,7 +41,7 @@ describe("TaggedCache", () => {
         });
     });
 
-    describe(".isValid", () => {
+    describe(".validate", () => {
         const testEntry = {
             key: "someKey",
             exp: 0,
@@ -52,12 +52,12 @@ describe("TaggedCache", () => {
         };
 
         it("should return true if exp === 0", () => {
-            expect(cache.isValid(testEntry)).toBeTruthy();
+            expect(cache.validate(testEntry)).toBeTruthy();
         });
 
         it("should return true if exp > 0 and not in past", () => {
             testEntry.exp = timestamp() + 10;
-            expect(cache.isValid(testEntry)).toBeTruthy();
+            expect(cache.validate(testEntry)).toBeTruthy();
         });
     });
 

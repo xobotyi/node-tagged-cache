@@ -158,7 +158,7 @@ Promise.resolve()
       "Tagged Cache (w/o timestamp)"
     ].mhas = measurePerformance.formatOPS(results);
 
-    return cache;
+    cache.flush();
   })
   .then(() => {
     enableTimestampCache();
@@ -239,7 +239,7 @@ Promise.resolve()
     benchResults["Tagged Cache"].mhas = measurePerformance.formatOPS(results);
 
     disableTimestampCache();
-    return cache;
+    cache.flush();
   })
   .then(() => {
     return populateNodeCache();

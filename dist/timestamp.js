@@ -17,18 +17,12 @@ function timestampSync() {
 }
 timestampSync();
 function disableTimestampCache() {
-    if (!_timestampSyncEnabled) {
-        return;
-    }
     _timestampSyncEnabled = false;
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     _timestampSyncTimeout = undefined;
 }
 exports.disableTimestampCache = disableTimestampCache;
 function enableTimestampCache() {
-    if (_timestampSyncEnabled) {
-        return;
-    }
     _timestampSyncEnabled = true;
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     timestampSync();

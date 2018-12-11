@@ -21,13 +21,21 @@ interface TaggedCacheEntry {
     tags: TagsVersionsList | null;
     val: any;
 }
+interface StatsObject {
+    items: number;
+    time: number;
+    uptime: number;
+}
 declare type TaggedCacheKey = string;
 declare type TaggedCacheKeysList = string[];
 export default class TaggedCache {
     private options;
     private readonly tags;
-    private storage;
+    private readonly storage;
+    private readonly crawler;
+    private readonly createdAt;
     constructor(options?: TaggedCacheOptions);
+    private cleanup;
     setOptions(options: TaggedCacheOptions): TaggedCache;
     getOptions(): TaggedCacheOptions;
     set(key: TaggedCacheKey, value: any, ttl: number, tags?: TagsList): TaggedCache;
@@ -40,6 +48,9 @@ export default class TaggedCache {
     mhas(keys: TaggedCacheKeysList): MultiHasResult;
     delete(key: TaggedCacheKey): TaggedCache;
     mdelete(keys: TaggedCacheKeysList): TaggedCache;
-    isValid(entry: TaggedCacheEntry, now?: number): boolean;
+    validate(entry: TaggedCacheEntry, now?: number): boolean;
+    flush(): TaggedCache;
+    keys(): IterableIterator<string>;
+    stats(): StatsObject;
 }
 export {};

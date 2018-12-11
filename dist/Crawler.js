@@ -7,6 +7,7 @@ class Crawler {
         this.step = () => {
             this._active &&
                 this.handler().then(() => {
+                    this.timeoutID && clearTimeout(this.timeoutID);
                     this.timeoutID = setTimeout(this.step, this.crawlInterval);
                 });
         };
@@ -31,7 +32,6 @@ class Crawler {
     }
     start() {
         this._active = true;
-        this.timeoutID && clearTimeout(this.timeoutID);
         this.step();
         return this;
     }

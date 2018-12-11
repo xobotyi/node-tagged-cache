@@ -39,7 +39,6 @@ export class Crawler {
   public start(): Crawler {
     this._active = true;
 
-    this.timeoutID && clearTimeout(this.timeoutID);
     this.step();
 
     return this;
@@ -57,6 +56,7 @@ export class Crawler {
   private step = (): void => {
     this._active &&
       this.handler().then(() => {
+        this.timeoutID && clearTimeout(this.timeoutID);
         this.timeoutID = setTimeout(this.step, this.crawlInterval);
       });
   };

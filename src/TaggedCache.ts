@@ -1,5 +1,6 @@
 import { TagController, TagsList, TagsVersionsList } from "./TagController";
 import timestamp from "./timestamp";
+import { Crawler } from "./Crawler";
 
 interface TaggedCacheOptions {
   defaultTTL?: number;
@@ -34,6 +35,12 @@ interface TaggedCacheEntry {
   val: any;
 }
 
+interface StatsObject {
+  items: number;
+  time: number;
+  uptime: number;
+}
+
 type TaggedCacheStorage = Map<string, TaggedCacheEntry>;
 type TaggedCacheKey = string;
 type TaggedCacheKeysList = string[];
@@ -43,11 +50,23 @@ export default class TaggedCache {
 
   private readonly tags: TagController = new TagController();
 
-  private storage: TaggedCacheStorage = new Map();
+  private readonly storage: TaggedCacheStorage = new Map();
+
+  private readonly crawler: Crawler;
+
+  private readonly createdAt: number = Date.now();
 
   constructor(options: TaggedCacheOptions = {}) {
+    this.crawler = new Crawler(this.cleanup);
+
     this.setOptions(options);
   }
+
+  private cleanup = async (): Promise<void> => {
+    for (let entry of this.storage.values()) {
+      this.validate(entry);
+    }
+  };
 
   public setOptions(options: TaggedCacheOptions): TaggedCache {
     if (options.defaultTTL && options.defaultTTL < 0) {
@@ -61,6 +80,12 @@ export default class TaggedCache {
       ...this.options,
       ...options
     };
+
+    if (this.options.cleanupInterval) {
+      this.crawler.setInterval(this.options.cleanupInterval).start();
+    } else {
+      this.crawler.stop();
+    }
 
     return this;
   }
@@ -127,7 +152,7 @@ export default class TaggedCache {
   ): any | TaggedCacheEntry {
     const entry = this.storage.get(key);
 
-    if (!entry || !this.isValid(entry)) {
+    if (!entry || !this.validate(entry)) {
       return defaultValue;
     }
 
@@ -155,7 +180,7 @@ export default class TaggedCache {
     for (const key of keys) {
       const entry = this.storage.get(key);
 
-      if (!entry || !this.isValid(entry, now)) {
+      if (!entry || !this.validate(entry, now)) {
         result[key] = defaultValue;
         continue;
       }
@@ -170,7 +195,7 @@ export default class TaggedCache {
     const entry = this.storage.get(key);
 
     if (entry) {
-      return this.isValid(entry);
+      return this.validate(entry);
     }
 
     return false;
@@ -184,7 +209,7 @@ export default class TaggedCache {
       const entry = this.storage.get(key);
 
       if (entry) {
-        result[key] = this.isValid(entry, now);
+        result[key] = this.validate(entry, now);
       } else {
         result[key] = false;
       }
@@ -207,7 +232,7 @@ export default class TaggedCache {
     return this;
   }
 
-  public isValid(entry: TaggedCacheEntry, now: number = 0): boolean {
+  public validate(entry: TaggedCacheEntry, now: number = 0): boolean {
     if (
       (entry.exp && (now || timestamp()) >= entry.exp) ||
       (entry.tags && !this.tags.validate(entry.tags))
@@ -217,5 +242,26 @@ export default class TaggedCache {
     }
 
     return true;
+  }
+
+  public flush(): TaggedCache {
+    this.storage.clear();
+    this.crawler.stop();
+
+    return this;
+  }
+
+  public keys(): IterableIterator<string> {
+    return this.storage.keys();
+  }
+
+  public stats(): StatsObject {
+    const stats: StatsObject = {
+      items: this.storage.size,
+      time: timestamp(),
+      uptime: Date.now() - this.createdAt
+    };
+
+    return stats;
   }
 }
