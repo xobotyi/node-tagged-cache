@@ -11,6 +11,10 @@ describe("timestamp", () => {
         startTimestampSync();
     });
 
+    afterAll(() => {
+        stopTimestampSync();
+    });
+
     describe("timestamp()", () => {
         it("should return a number", () => {
             expect(typeof timestamp()).toBe("number");

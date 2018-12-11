@@ -125,7 +125,7 @@ describe("TaggedCache", () => {
         });
 
         it("should return whole entry with service fields if item exists and raw=true", () => {
-            const entry = cache.get('testKey', "This item is not exists", true);
+            const entry = cache.get('testKey', "This item does not exist", true);
 
             expect(typeof entry).toBe("object");
 
@@ -179,6 +179,120 @@ describe("TaggedCache", () => {
                                     "testKey1": testKey1Entry,
                                     "testKey3": null,
                                 });
+        });
+
+        it("should invalidate entries if it is expired but not garbage collected yet", (done) => {
+            cache.set('testKey', 'testValue', 2, ['tag1']);
+            setTimeout(() => {
+                const res = cache.mget(["testKey", "testKey1", "testKey3"], null, true);
+                expect(res).toEqual({
+                                        "testKey": null,
+                                        "testKey1": testKey1Entry,
+                                        "testKey3": null,
+                                    });
+                done();
+            }, 10)
+        });
+    });
+
+    describe(".has", () => {
+        const cache = new TaggedCache({cleanupInterval: 0});
+        cache.mset(
+            {
+                'testKey': 'testValue',
+                'testKey1': 'testValue1',
+            },
+            200000,
+            ['tag1']);
+
+        it("should return false if entry does not exists", () => {
+            expect(cache.has('testKey2')).toBeFalsy();
+        });
+
+        it("should return true if entry exists", () => {
+            expect(cache.has('testKey')).toBeTruthy();
+        });
+
+        it("should invalidate entry if it is expired but not garbage collected yet and return false", (done) => {
+            cache.set('testKey', 'testValue', 2, ['tag1']);
+            setTimeout(() => {
+                expect(cache.has('testKey')).toBeFalsy();
+                done();
+            }, 10)
+        });
+    });
+
+    describe(".mhas", () => {
+        const cache = new TaggedCache({cleanupInterval: 0});
+        cache.mset(
+            {
+                'testKey': 'testValue',
+                'testKey1': 'testValue1',
+            },
+            200000,
+            ['tag1']);
+
+        it("should return an object with requested keys as object keys and result as values", () => {
+            const res = cache.mhas(["testKey", "testKey1", "testKey3"]);
+            expect(typeof res).toBe('object');
+            expect(res).toEqual({
+                                    "testKey": true,
+                                    "testKey1": true,
+                                    "testKey3": false,
+                                });
+        });
+
+        it("should invalidate entries if it is expired but not garbage collected yet", (done) => {
+            cache.set('testKey', 'testValue', 2, ['tag1']);
+            setTimeout(() => {
+                const res = cache.mhas(["testKey", "testKey1", "testKey3"]);
+                expect(res).toEqual({
+                                        "testKey": false,
+                                        "testKey1": true,
+                                        "testKey3": false,
+                                    });
+                done();
+            }, 10)
+        });
+    });
+
+    describe(".delete", () => {
+        const cache = new TaggedCache({cleanupInterval: 0});
+        cache.mset(
+            {
+                'testKey': 'testValue',
+                'testKey1': 'testValue1',
+            },
+            200000,
+            ['tag1']);
+
+        it("should return an instance", () => {
+            expect(cache.delete('testKey3')).toBe(cache);
+        });
+
+        it("should delete given entry", () => {
+            expect(cache.delete('testKey').get("testKey", "This item does not exist")).toBe("This item does not exist");
+        });
+    });
+
+    describe(".mdelete", () => {
+        const cache = new TaggedCache({cleanupInterval: 0});
+        cache.mset(
+            {
+                'testKey': 'testValue',
+                'testKey1': 'testValue1',
+            },
+            200000,
+            ['tag1']);
+
+        it("should return an instance", () => {
+            expect(cache.mdelete(['testKey3'])).toBe(cache);
+        });
+
+        it("should delete given entries", () => {
+            cache.mdelete(['testKey', 'testKey1']);
+            expect(cache.get("testKey", "This item does not exist")).toBe("This item does not exist");
+            expect(cache.get("testKey1", "This item does not exist")).toBe("This item does not exist");
         });
     });
 });
