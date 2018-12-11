@@ -11,6 +11,7 @@ let _timestampSyncTimeout;
 function timestampSync() {
     _timestamp = Date.now();
     if (_timestampSyncEnabled) {
+        _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
         _timestampSyncTimeout = setTimeout(timestampSync, _timestampSyncInterval);
     }
 }
@@ -37,11 +38,15 @@ function setTimestampSyncInterval(interval) {
     if (interval <= 0) {
         throw new Error("interval has to be greater than 0");
     }
-    if (interval === _timestampSyncInterval || !_timestampSyncEnabled) {
+    if (interval === _timestampSyncInterval) {
         return;
     }
     _timestampSyncInterval = interval;
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
-    timestampSync();
+    _timestampSyncEnabled && timestampSync();
 }
 exports.setTimestampSyncInterval = setTimestampSyncInterval;
+function getTimestampSyncInterval() {
+    return _timestampSyncInterval;
+}
+exports.getTimestampSyncInterval = getTimestampSyncInterval;

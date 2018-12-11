@@ -17,16 +17,17 @@ let _timestampSyncInterval: number = 1000;
 let _timestampSyncEnabled: boolean = true;
 let _timestampSyncTimeout: Timeout | undefined;
 
-function timestampSync() {
+function timestampSync(): void {
   _timestamp = Date.now();
   if (_timestampSyncEnabled) {
+    _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     _timestampSyncTimeout = setTimeout(timestampSync, _timestampSyncInterval);
   }
 }
 
 timestampSync();
 
-export function stopTimestampSync() {
+export function stopTimestampSync(): void {
   if (!_timestampSyncEnabled) {
     return;
   }
@@ -36,7 +37,7 @@ export function stopTimestampSync() {
   _timestampSyncTimeout = undefined;
 }
 
-export function startTimestampSync() {
+export function startTimestampSync(): void {
   if (_timestampSyncEnabled) {
     return;
   }
@@ -47,16 +48,20 @@ export function startTimestampSync() {
   timestampSync();
 }
 
-export function setTimestampSyncInterval(interval: number) {
+export function setTimestampSyncInterval(interval: number): void {
   if (interval <= 0) {
     throw new Error("interval has to be greater than 0");
   }
 
-  if (interval === _timestampSyncInterval || !_timestampSyncEnabled) {
+  if (interval === _timestampSyncInterval) {
     return;
   }
 
   _timestampSyncInterval = interval;
   _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
-  timestampSync();
+  _timestampSyncEnabled && timestampSync();
+}
+
+export function getTimestampSyncInterval(): number {
+  return _timestampSyncInterval;
 }
