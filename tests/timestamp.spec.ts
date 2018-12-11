@@ -59,10 +59,13 @@ describe("timestamp", () => {
             expect(() => setTimestampSyncInterval(-1)).toThrowError();
         });
 
-        it("should perform immediate sync if interval has changed", () => {
+        it("should perform immediate sync if interval has changed", (done) => {
             const prevTimestamp = timestamp();
-            setTimestampSyncInterval(50);
-            expect(timestamp()).not.toBe(prevTimestamp);
+            setTimeout(() => {
+                setTimestampSyncInterval(50);
+                expect(timestamp()).not.toBe(prevTimestamp);
+                done()
+            }, 10)
         });
 
         it("should NOT perform immediate sync if interval not changed", () => {
