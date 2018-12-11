@@ -1,5 +1,5 @@
 import {TagController} from "../src/TagController";
-import timestamp from "../src/timestamp";
+import {timestamp} from "../src/index";
 
 describe("TagController", () => {
     describe(".drop", () => {

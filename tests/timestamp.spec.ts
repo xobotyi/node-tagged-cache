@@ -1,18 +1,18 @@
 import timestamp, {
-    getTimestampSyncInterval,
-    setTimestampSyncInterval,
-    startTimestampSync,
-    stopTimestampSync,
+    getTimestampCacheTTL,
+    setTimestampCacheTTL,
+    enableTimestampCache,
+    disableTimestampCache,
 } from "../src/timestamp";
 
 describe("timestamp", () => {
     beforeEach(() => {
-        setTimestampSyncInterval(101);
-        startTimestampSync();
+        setTimestampCacheTTL(101);
+        enableTimestampCache();
     });
 
     afterAll(() => {
-        stopTimestampSync();
+        disableTimestampCache();
     });
 
     describe("timestamp()", () => {
@@ -21,7 +21,7 @@ describe("timestamp", () => {
         });
 
         it("should update with given interval", (done) => {
-            setTimestampSyncInterval(50);
+            setTimestampCacheTTL(50);
             const prevTimestamp = timestamp();
 
             setTimeout(() => {
@@ -31,15 +31,15 @@ describe("timestamp", () => {
         });
     });
 
-    describe("getTimestampSyncInterval()", () => {
+    describe("getTimestampCacheTTL()", () => {
         it("should return a number", () => {
-            expect(typeof getTimestampSyncInterval()).toBe("number");
+            expect(typeof getTimestampCacheTTL()).toBe("number");
         });
 
         it("should return current sync interval", (done) => {
-            setTimestampSyncInterval(40);
+            setTimestampCacheTTL(40);
             const prevTimestamp = timestamp();
-            expect(getTimestampSyncInterval()).toBe(40);
+            expect(getTimestampCacheTTL()).toBe(40);
 
             setTimeout(() => {
                 expect(timestamp()).toBe(prevTimestamp);
@@ -52,21 +52,21 @@ describe("timestamp", () => {
         });
     });
 
-    describe("setTimestampSyncInterval()", () => {
+    describe("setTimestampCacheTTL()", () => {
         it("should set the sync interval", () => {
-            setTimestampSyncInterval(100);
-            expect(getTimestampSyncInterval()).toBe(100);
+            setTimestampCacheTTL(100);
+            expect(getTimestampCacheTTL()).toBe(100);
         });
 
         it("should throw if interval <=0", () => {
-            expect(() => setTimestampSyncInterval(0)).toThrowError();
-            expect(() => setTimestampSyncInterval(-1)).toThrowError();
+            expect(() => setTimestampCacheTTL(0)).toThrowError();
+            expect(() => setTimestampCacheTTL(-1)).toThrowError();
         });
 
         it("should perform immediate sync if interval has changed", (done) => {
             const prevTimestamp = timestamp();
             setTimeout(() => {
-                setTimestampSyncInterval(50);
+                setTimestampCacheTTL(50);
                 expect(timestamp()).not.toBe(prevTimestamp);
                 done()
             }, 10)
@@ -74,26 +74,26 @@ describe("timestamp", () => {
 
         it("should NOT perform immediate sync if interval not changed", () => {
             const prevTimestamp = timestamp();
-            setTimestampSyncInterval(50);
+            setTimestampCacheTTL(50);
             expect(timestamp()).toBe(prevTimestamp);
         });
 
         it("or sync is disabled", () => {
             const prevTimestamp = timestamp();
-            stopTimestampSync();
-            setTimestampSyncInterval(50);
+            disableTimestampCache();
+            setTimestampCacheTTL(50);
             expect(timestamp() - prevTimestamp).toBeLessThanOrEqual(2);
         });
     });
 
-    describe("stopTimestampSync()", () => {
+    describe("disableTimestampCache()", () => {
         it("should switch timestamp() to the Date.now() alias", (done) => {
             const prevTimestamp = timestamp();
 
             setTimeout(() => {
                 expect(timestamp()).toBe(prevTimestamp);
                 expect(timestamp()).not.toBe(Date.now());
-                stopTimestampSync();
+                disableTimestampCache();
 
                 setTimeout(() => {
                     expect(timestamp()).not.toBe(prevTimestamp);
@@ -104,19 +104,19 @@ describe("timestamp", () => {
         });
 
         it("should not do anything if sync is already stopped", () => {
-            stopTimestampSync();
-            stopTimestampSync();
+            disableTimestampCache();
+            disableTimestampCache();
 
             expect(timestamp() - Date.now()).toBeLessThanOrEqual(2);
         });
     });
 
-    describe("stopTimestampSync()", () => {
+    describe("disableTimestampCache()", () => {
         it("should switch timestamp() to the cached version", (done) => {
-            stopTimestampSync();
+            disableTimestampCache();
             expect(timestamp() - Date.now()).toBeLessThanOrEqual(2);
 
-            startTimestampSync();
+            enableTimestampCache();
             const prevTimestamp = timestamp();
 
             setTimeout(() => {
@@ -126,10 +126,10 @@ describe("timestamp", () => {
         });
 
         it("should not do anything if sync is already started", (done) => {
-            startTimestampSync();
+            enableTimestampCache();
 
             const prevTimestamp = timestamp();
-            startTimestampSync();
+            enableTimestampCache();
 
             setTimeout(() => {
                 expect(timestamp()).toBe(prevTimestamp);

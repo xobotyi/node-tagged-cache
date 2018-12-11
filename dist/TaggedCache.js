@@ -115,4 +115,4 @@ class TaggedCache {
         return true;
     }
 }
-exports.TaggedCache = TaggedCache;
+exports.default = TaggedCache;

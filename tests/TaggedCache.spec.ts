@@ -1,7 +1,6 @@
-import {TaggedCache} from "../src/TaggedCache";
-import timestamp, {stopTimestampSync} from "../src/timestamp";
+import {disableTimestampCache, TaggedCache, timestamp} from "../src/index";
 
-stopTimestampSync();
+disableTimestampCache();
 
 describe("TaggedCache", () => {
     const cache = new TaggedCache({cleanupInterval: 0});

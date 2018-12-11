@@ -14,7 +14,7 @@ export default function(): number {
 
 let _timestamp: number = 0;
 let _timestampSyncInterval: number = 1000;
-let _timestampSyncEnabled: boolean = true;
+let _timestampSyncEnabled: boolean = false;
 let _timestampSyncTimeout: Timeout | undefined;
 
 function timestampSync(): void {
@@ -27,7 +27,7 @@ function timestampSync(): void {
 
 timestampSync();
 
-export function stopTimestampSync(): void {
+export function disableTimestampCache(): void {
   if (!_timestampSyncEnabled) {
     return;
   }
@@ -37,7 +37,7 @@ export function stopTimestampSync(): void {
   _timestampSyncTimeout = undefined;
 }
 
-export function startTimestampSync(): void {
+export function enableTimestampCache(): void {
   if (_timestampSyncEnabled) {
     return;
   }
@@ -48,7 +48,7 @@ export function startTimestampSync(): void {
   timestampSync();
 }
 
-export function setTimestampSyncInterval(interval: number): void {
+export function setTimestampCacheTTL(interval: number): void {
   if (interval <= 0) {
     throw new Error("interval has to be greater than 0");
   }
@@ -62,6 +62,6 @@ export function setTimestampSyncInterval(interval: number): void {
   _timestampSyncEnabled && timestampSync();
 }
 
-export function getTimestampSyncInterval(): number {
+export function getTimestampCacheTTL(): number {
   return _timestampSyncInterval;
 }

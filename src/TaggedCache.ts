@@ -38,7 +38,7 @@ type TaggedCacheStorage = Map<string, TaggedCacheEntry>;
 type TaggedCacheKey = string;
 type TaggedCacheKeysList = string[];
 
-export class TaggedCache {
+export default class TaggedCache {
   private options: TaggedCacheOptions = { ...defaultOptions };
 
   private readonly tags: TagController = new TagController();

@@ -6,7 +6,7 @@ function default_1() {
 exports.default = default_1;
 let _timestamp = 0;
 let _timestampSyncInterval = 1000;
-let _timestampSyncEnabled = true;
+let _timestampSyncEnabled = false;
 let _timestampSyncTimeout;
 function timestampSync() {
     _timestamp = Date.now();
@@ -16,7 +16,7 @@ function timestampSync() {
     }
 }
 timestampSync();
-function stopTimestampSync() {
+function disableTimestampCache() {
     if (!_timestampSyncEnabled) {
         return;
     }
@@ -24,8 +24,8 @@ function stopTimestampSync() {
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     _timestampSyncTimeout = undefined;
 }
-exports.stopTimestampSync = stopTimestampSync;
-function startTimestampSync() {
+exports.disableTimestampCache = disableTimestampCache;
+function enableTimestampCache() {
     if (_timestampSyncEnabled) {
         return;
     }
@@ -33,8 +33,8 @@ function startTimestampSync() {
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     timestampSync();
 }
-exports.startTimestampSync = startTimestampSync;
-function setTimestampSyncInterval(interval) {
+exports.enableTimestampCache = enableTimestampCache;
+function setTimestampCacheTTL(interval) {
     if (interval <= 0) {
         throw new Error("interval has to be greater than 0");
     }
@@ -45,8 +45,8 @@ function setTimestampSyncInterval(interval) {
     _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
     _timestampSyncEnabled && timestampSync();
 }
-exports.setTimestampSyncInterval = setTimestampSyncInterval;
-function getTimestampSyncInterval() {
+exports.setTimestampCacheTTL = setTimestampCacheTTL;
+function getTimestampCacheTTL() {
     return _timestampSyncInterval;
 }
-exports.getTimestampSyncInterval = getTimestampSyncInterval;
+exports.getTimestampCacheTTL = getTimestampCacheTTL;
