@@ -1,6 +1,6 @@
 {
   "name": "node-tagged-cache",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/TaggedCache.js",
   "repository": {
     "type": "git",
@@ -28,7 +28,6 @@
     "test:coverage": "jest --coverage",
     "format:fix": "prettier --write src/**/*.ts benchmarks/**/*.js",
     "format:list": "prettier -l src/**/*.ts benchmarks/**/*.js",
-
     "preversion": "npm run test && npm run build && npm run format:fix",
     "postversion": "git push && git push --tags",
     "prepublishOnly": "npm run test && npm run build"
