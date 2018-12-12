@@ -46,13 +46,13 @@ type TaggedCacheKey = string;
 type TaggedCacheKeysList = string[];
 
 export default class TaggedCache {
-  private options: TaggedCacheOptions = { ...defaultOptions };
+  public readonly tags: TagController = new TagController();
 
-  private readonly tags: TagController = new TagController();
+  public readonly crawler: Crawler;
 
   private readonly storage: TaggedCacheStorage = new Map();
 
-  private readonly crawler: Crawler;
+  private options: TaggedCacheOptions = { ...defaultOptions };
 
   private readonly createdAt: number = Date.now();
 
@@ -62,7 +62,7 @@ export default class TaggedCache {
     this.setOptions(options);
   }
 
-  private cleanup = async (): Promise<void> => {
+  public cleanup = async (): Promise<void> => {
     for (let entry of this.storage.values()) {
       this.validate(entry);
     }
@@ -82,7 +82,7 @@ export default class TaggedCache {
     };
 
     if (this.options.cleanupInterval) {
-      this.crawler.setInterval(this.options.cleanupInterval).start();
+      this.crawler.setInterval(this.options.cleanupInterval);
     } else {
       this.crawler.stop();
     }
@@ -97,7 +97,7 @@ export default class TaggedCache {
   public set(
     key: TaggedCacheKey,
     value: any,
-    ttl: number,
+    ttl: number = <number>this.options.defaultTTL,
     tags: TagsList = []
   ): TaggedCache {
     const iat = timestamp();
@@ -112,13 +112,14 @@ export default class TaggedCache {
     };
 
     this.storage.set(key, entry);
+    this.storage.size && !this.crawler.active && this.crawler.start();
 
     return this;
   }
 
   public mset(
     setToStore: MultiGetResult,
-    ttl: number,
+    ttl: number = <number>this.options.defaultTTL,
     tags: TagsList = []
   ): TaggedCache {
     const iat = timestamp();
@@ -135,6 +136,8 @@ export default class TaggedCache {
 
       this.storage.set(key, entry);
     }
+
+    this.storage.size && !this.crawler.active && this.crawler.start();
 
     return this;
   }
@@ -221,6 +224,10 @@ export default class TaggedCache {
   public delete(key: TaggedCacheKey): TaggedCache {
     this.storage.delete(key);
 
+    if (!this.storage.size) {
+      this.crawler.stop();
+    }
+
     return this;
   }
 
@@ -228,6 +235,8 @@ export default class TaggedCache {
     for (const key of keys) {
       this.storage.delete(key);
     }
+
+    !this.storage.size && this.crawler.active && this.crawler.stop();
 
     return this;
   }
@@ -238,6 +247,9 @@ export default class TaggedCache {
       (entry.tags && !this.tags.validate(entry.tags))
     ) {
       this.storage.delete(entry.key);
+
+      !this.storage.size && this.crawler.active && this.crawler.stop();
+
       return false;
     }
 
@@ -256,12 +268,10 @@ export default class TaggedCache {
   }
 
   public stats(): StatsObject {
-    const stats: StatsObject = {
+    return {
       items: this.storage.size,
       time: timestamp(),
       uptime: Date.now() - this.createdAt
     };
-
-    return stats;
   }
 }

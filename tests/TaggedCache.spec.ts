@@ -3,7 +3,11 @@ import {disableTimestampCache, TaggedCache, timestamp} from "../src/index";
 disableTimestampCache();
 
 describe("TaggedCache", () => {
-    const cache = new TaggedCache({cleanupInterval: 0});
+    const cache = new TaggedCache({cleanupInterval: 60000});
+
+    afterEach(() => {
+        cache.flush();
+    });
 
     describe(".getOptions", () => {
         it("should return an object", () => {
@@ -39,13 +43,48 @@ describe("TaggedCache", () => {
         it("should throw if cleanupInterval <0", () => {
             expect(() => cache.setOptions({cleanupInterval: -1})).toThrowError();
         });
+
+        it("should restart the crawler if cleanupInterval has changed", (done) => {
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 10, ['tag1']);
+            expect(cache.stats().items).toBe(2);
+            expect(cache.crawler.active).toBeTruthy();
+
+            setTimeout(() => {
+                cache.setOptions({cleanupInterval: 1000});
+                expect(cache.stats().items).toBe(0);
+                done();
+            }, 50);
+        });
+    });
+
+    describe(".stats", () => {
+        it("should return actual server statistics", () => {
+            const stats = cache.stats();
+            const keys  = Object.getOwnPropertyNames(stats);
+
+            expect(keys.includes("items")).toBeTruthy();
+            expect(keys.includes("time")).toBeTruthy();
+            expect(keys.includes("uptime")).toBeTruthy();
+        });
+    });
+
+    describe(".cleanup", () => {
+        it("should remove all invalid keys", (done) => {
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 200000, ['tag1']);
+            expect(cache.stats().items).toBe(2);
+            cache.tags.drop('tag1');
+            cache.cleanup().then(() => {
+                expect(cache.stats().items).toBe(0);
+                done();
+            });
+        });
     });
 
     describe(".validate", () => {
         const testEntry = {
-            key: "someKey",
+            key: "testKey",
             exp: 0,
-            iat: timestamp(),
+            iat: 0,
             ttl: 0,
             tags: {},
             val: null,
@@ -59,6 +98,76 @@ describe("TaggedCache", () => {
             testEntry.exp = timestamp() + 10;
             expect(cache.validate(testEntry)).toBeTruthy();
         });
+
+        it("should delete entry given key if it is invalid", () => {
+            testEntry.exp = 2;
+            testEntry.iat = 1;
+            testEntry.ttl = 1;
+
+            expect(cache.stats().items).toBe(0);
+            cache.set('testKey', 'testValue', 200000, ['tag1']);
+            expect(cache.stats().items).toBe(1);
+            expect(cache.validate(testEntry)).toBeFalsy();
+            expect(cache.stats().items).toBe(0);
+        });
+    });
+
+    describe(".delete", () => {
+        it("should return instance", () => {
+            expect(cache.delete('testKey')).toBe(cache);
+        });
+        it("should delete given key", () => {
+            expect(cache.stats().items).toBe(0);
+            cache.set('testKey', 'testValue', 200000, ['tag1']);
+            expect(cache.stats().items).toBe(1);
+            cache.delete('testKey');
+            expect(cache.stats().items).toBe(0);
+        });
+    });
+
+    describe(".mdelete", () => {
+        it("should return instance", () => {
+            expect(cache.mdelete(['testKey'])).toBe(cache);
+        });
+
+        it("should delete given keys", () => {
+            expect(cache.stats().items).toBe(0);
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 200000, ['tag1']);
+            expect(cache.stats().items).toBe(2);
+            cache.mdelete(['testKey', 'testKey2']);
+            expect(cache.stats().items).toBe(0);
+        });
+    });
+
+    describe(".flush", () => {
+        it("should empty the storage", () => {
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 200000, ['tag1']);
+            expect(cache.stats().items).toBe(2);
+            cache.flush();
+            expect(cache.stats().items).toBe(0);
+        });
+
+        it("and stop the crawler", () => {
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 200000, ['tag1']);
+            cache.flush();
+
+            expect(cache.crawler.active).toBeFalsy();
+        });
+    });
+
+    describe(".keys", () => {
+        it("should return the iterator", () => {
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 200000, ['tag1']);
+            expect(cache.stats().items).toBe(2);
+            expect(cache.keys().next).toBeInstanceOf(Function);
+        });
+
+        it("that will iterate over the keys", () => {
+            cache.mset({'testKey': 'testValue', 'testKey2': 'testValue2'}, 200000, ['tag1']);
+            const iterator = cache.keys();
+            expect(iterator.next().value).toBe("testKey");
+            expect(iterator.next().value).toBe("testKey2");
+        });
     });
 
     describe(".set", () => {
@@ -70,6 +179,7 @@ describe("TaggedCache", () => {
             cache.set('testKey', 'testValue', 200000, ['tag1']);
             const entry = cache.get('testKey', null, true);
 
+            expect(cache.stats().items).toBe(1);
             expect(entry).not.toBe(null);
             expect(entry.key).toBe('testKey');
             expect(entry.val).toBe('testValue');
@@ -94,6 +204,7 @@ describe("TaggedCache", () => {
                 ['tag1']);
             const entries = cache.mget(['testKey', 'testKey1'], null, true);
 
+            expect(cache.stats().items).toBe(2);
             expect(entries['testKey']).not.toBe(null);
             expect(entries['testKey'].key).toBe('testKey');
             expect(entries['testKey'].val).toBe('testValue');

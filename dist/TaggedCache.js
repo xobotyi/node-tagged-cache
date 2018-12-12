@@ -18,9 +18,9 @@ const defaultOptions = {
 };
 class TaggedCache {
     constructor(options = {}) {
-        this.options = Object.assign({}, defaultOptions);
         this.tags = new TagController_1.TagController();
         this.storage = new Map();
+        this.options = Object.assign({}, defaultOptions);
         this.createdAt = Date.now();
         this.cleanup = () => __awaiter(this, void 0, void 0, function* () {
             for (let entry of this.storage.values()) {
@@ -39,7 +39,7 @@ class TaggedCache {
         }
         this.options = Object.assign({}, this.options, options);
         if (this.options.cleanupInterval) {
-            this.crawler.setInterval(this.options.cleanupInterval).start();
+            this.crawler.setInterval(this.options.cleanupInterval);
         }
         else {
             this.crawler.stop();
@@ -49,7 +49,7 @@ class TaggedCache {
     getOptions() {
         return Object.assign({}, this.options);
     }
-    set(key, value, ttl, tags = []) {
+    set(key, value, ttl = this.options.defaultTTL, tags = []) {
         const iat = timestamp_1.default();
         const entry = {
             key,
@@ -60,9 +60,10 @@ class TaggedCache {
             tags: !tags.length ? null : this.tags.mget(tags)
         };
         this.storage.set(key, entry);
+        this.storage.size && !this.crawler.active && this.crawler.start();
         return this;
     }
-    mset(setToStore, ttl, tags = []) {
+    mset(setToStore, ttl = this.options.defaultTTL, tags = []) {
         const iat = timestamp_1.default();
         for (let key in setToStore) {
             const entry = {
@@ -75,6 +76,7 @@ class TaggedCache {
             };
             this.storage.set(key, entry);
         }
+        this.storage.size && !this.crawler.active && this.crawler.start();
         return this;
     }
     get(key, defaultValue = undefined, raw = false) {
@@ -120,18 +122,23 @@ class TaggedCache {
     }
     delete(key) {
         this.storage.delete(key);
+        if (!this.storage.size) {
+            this.crawler.stop();
+        }
         return this;
     }
     mdelete(keys) {
         for (const key of keys) {
             this.storage.delete(key);
         }
+        !this.storage.size && this.crawler.active && this.crawler.stop();
         return this;
     }
     validate(entry, now = 0) {
         if ((entry.exp && (now || timestamp_1.default()) >= entry.exp) ||
             (entry.tags && !this.tags.validate(entry.tags))) {
             this.storage.delete(entry.key);
+            !this.storage.size && this.crawler.active && this.crawler.stop();
             return false;
         }
         return true;
@@ -145,12 +152,11 @@ class TaggedCache {
         return this.storage.keys();
     }
     stats() {
-        const stats = {
+        return {
             items: this.storage.size,
             time: timestamp_1.default(),
             uptime: Date.now() - this.createdAt
         };
-        return stats;
     }
 }
 exports.default = TaggedCache;

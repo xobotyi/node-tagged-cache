@@ -54,9 +54,9 @@ export class Crawler {
   }
 
   private step = (): void => {
+    this.timeoutID && clearTimeout(this.timeoutID);
     this._active &&
       this.handler().then(() => {
-        this.timeoutID && clearTimeout(this.timeoutID);
         this.timeoutID = setTimeout(this.step, this.crawlInterval);
       });
   };

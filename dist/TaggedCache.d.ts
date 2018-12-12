@@ -1,4 +1,5 @@
-import { TagsList, TagsVersionsList } from "./TagController";
+import { TagController, TagsList, TagsVersionsList } from "./TagController";
+import { Crawler } from "./Crawler";
 interface TaggedCacheOptions {
     defaultTTL?: number;
     emitErrorOnMissing?: boolean;
@@ -29,17 +30,17 @@ interface StatsObject {
 declare type TaggedCacheKey = string;
 declare type TaggedCacheKeysList = string[];
 export default class TaggedCache {
-    private options;
-    private readonly tags;
+    readonly tags: TagController;
+    readonly crawler: Crawler;
     private readonly storage;
-    private readonly crawler;
+    private options;
     private readonly createdAt;
     constructor(options?: TaggedCacheOptions);
-    private cleanup;
+    cleanup: () => Promise<void>;
     setOptions(options: TaggedCacheOptions): TaggedCache;
     getOptions(): TaggedCacheOptions;
-    set(key: TaggedCacheKey, value: any, ttl: number, tags?: TagsList): TaggedCache;
-    mset(setToStore: MultiGetResult, ttl: number, tags?: TagsList): TaggedCache;
+    set(key: TaggedCacheKey, value: any, ttl?: number, tags?: TagsList): TaggedCache;
+    mset(setToStore: MultiGetResult, ttl?: number, tags?: TagsList): TaggedCache;
     get(key: TaggedCacheKey, defaultValue?: any, raw?: false): any;
     get(key: TaggedCacheKey, defaultValue?: any, raw?: true): TaggedCacheEntry;
     mget(keys: TaggedCacheKeysList, defaultValue?: any, raw?: false): MultiGetResult;
