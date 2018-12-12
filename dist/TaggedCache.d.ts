@@ -2,7 +2,6 @@ import { TagController, TagsList, TagsVersionsList } from "./TagController";
 import { Crawler } from "./Crawler";
 interface TaggedCacheOptions {
     defaultTTL?: number;
-    emitErrorOnMissing?: boolean;
     cleanupInterval?: number;
 }
 interface MultiGetResult {

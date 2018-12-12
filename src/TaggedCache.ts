@@ -4,13 +4,11 @@ import {Crawler} from "./Crawler";
 
 interface TaggedCacheOptions {
     defaultTTL?: number;
-    emitErrorOnMissing?: boolean;
     cleanupInterval?: number;
 }
 
 const defaultOptions: TaggedCacheOptions = {
     defaultTTL: 600000, // 10m
-    emitErrorOnMissing: false,
     cleanupInterval: 60000, // 1m
 };
 

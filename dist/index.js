@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var TaggedCache_1 = require("./TaggedCache");
+const TaggedCache_1 = require("./TaggedCache");
 exports.TaggedCache = TaggedCache_1.default;
 var timestamp_1 = require("./timestamp");
 exports.timestamp = timestamp_1.default;
@@ -8,3 +8,5 @@ exports.enableTimestampCache = timestamp_1.enableTimestampCache;
 exports.disableTimestampCache = timestamp_1.disableTimestampCache;
 exports.setTimestampCacheTTL = timestamp_1.setTimestampCacheTTL;
 exports.getTimestampCacheTTL = timestamp_1.getTimestampCacheTTL;
+const _default = new TaggedCache_1.default();
+exports.default = _default;

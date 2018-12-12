@@ -7,11 +7,13 @@ function rand(min, max) {
     return min + Math.floor(Math.random() * (max - min + 1));
 }
 
-function populateTaggedCache() {
+function populateTaggedCache(tags = false) {
     const taggedCache = new TaggedCache();
 
     for (let i = 0; i < 100000; i++) {
-        taggedCache.set("someKey" + i, "someVal" + i, 2000000, ["tag1", "tag2", "tag3"]);
+        tags
+            ? taggedCache.set("someKey" + i, "someVal" + i, 2000000, ["tag1", "tag2", "tag3"])
+            : taggedCache.set("someKey" + i, "someVal" + i, 2000000);
     }
 
     return taggedCache;
@@ -53,16 +55,98 @@ const generateKV = (asObject = false) => {
 };
 
 const benchResults = {
+    "Tagged Cache (w/o timestamp) (w/o tags)": {},
     "Tagged Cache (w/o timestamp)": {},
+    "Tagged Cache (w/o tags)": {},
     "Tagged Cache": {},
-    "cache-base": {},
     "node-cache": {},
+    "cache-base": {},
 };
 
 Promise.resolve()
     .then(() => {
         disableTimestampCache();
         return populateTaggedCache();
+    })
+    .then(function taggedCacheSet(cache) {
+        process.stdout.write(`\rTaggedCache [set]         `);
+        const valuesToSet = generateKV();
+
+        const results = measurePerformance(() => {
+            for (let pair of valuesToSet) {
+                cache.set(pair[0], pair[1], 2000000);
+            }
+        });
+
+        benchResults["Tagged Cache (w/o timestamp) (w/o tags)"].set = measurePerformance.formatOPS(results);
+        return cache;
+    })
+    .then(function taggedCacheMultiSet(cache) {
+        process.stdout.write(`\rTaggedCache [multi-set]   `);
+        const valuesToSet = generateKV(true);
+
+        const results = measurePerformance(() => {
+            cache.mset(valuesToSet, 2000000);
+        });
+
+        benchResults["Tagged Cache (w/o timestamp) (w/o tags)"].mset = measurePerformance.formatOPS(results);
+
+        return cache;
+    })
+    .then(function taggedCacheGet(cache) {
+        process.stdout.write(`\rTaggedCache [get]         `);
+        const valuesToGet = generateKV();
+
+        const results = measurePerformance(() => {
+            for (let pair of valuesToGet) {
+                cache.get(pair[0]);
+            }
+        });
+
+        benchResults["Tagged Cache (w/o timestamp) (w/o tags)"].get = measurePerformance.formatOPS(results);
+
+        return cache;
+    })
+    .then(function taggedCacheMultiGet(cache) {
+        process.stdout.write(`\rTaggedCache [multi-get]    `);
+        const valuesToGet = Object.getOwnPropertyNames(generateKV(true));
+
+        const results = measurePerformance(() => {
+            cache.mget(valuesToGet);
+        });
+
+        benchResults["Tagged Cache (w/o timestamp) (w/o tags)"].mget = measurePerformance.formatOPS(results);
+        return cache;
+    })
+    .then(function taggedCacheHas(cache) {
+        process.stdout.write(`\rTaggedCache [has]          `);
+        const valuesToSet = generateKV();
+
+        const results = measurePerformance(() => {
+            for (let pair of valuesToSet) {
+                cache.has(pair[0]);
+            }
+        });
+
+        benchResults["Tagged Cache (w/o timestamp) (w/o tags)"].has = measurePerformance.formatOPS(results);
+
+        return cache;
+    })
+    .then(function taggedCacheMultiHas(cache) {
+        process.stdout.write(`\rTaggedCache [multi-has]     `);
+        const valuesToCheck = Object.getOwnPropertyNames(generateKV(true));
+
+        const results = measurePerformance(() => {
+            cache.mhas(valuesToCheck);
+        });
+
+        benchResults["Tagged Cache (w/o timestamp) (w/o tags)"].mhas = measurePerformance.formatOPS(results);
+
+        cache.flush();
+    })
+    .then(() => {
+        disableTimestampCache();
+        return populateTaggedCache(true);
     })
     .then(function taggedCacheSet(cache) {
         process.stdout.write(`\rTaggedCache [set]         `);
@@ -143,6 +227,87 @@ Promise.resolve()
     .then(() => {
         enableTimestampCache();
         return populateTaggedCache();
+    })
+    .then(function taggedCacheSet(cache) {
+        process.stdout.write(`\rTaggedCache [set]         `);
+        const valuesToSet = generateKV();
+
+        const results = measurePerformance(() => {
+            for (let pair of valuesToSet) {
+                cache.set(pair[0], pair[1], 2000000);
+            }
+        });
+
+        benchResults["Tagged Cache (w/o tags)"].set = measurePerformance.formatOPS(results);
+        return cache;
+    })
+    .then(function taggedCacheMultiSet(cache) {
+        process.stdout.write(`\rTaggedCache [multi-set]   `);
+        const valuesToSet = generateKV(true);
+
+        const results = measurePerformance(() => {
+            cache.mset(valuesToSet, 2000000);
+        });
+
+        benchResults["Tagged Cache (w/o tags)"].mset = measurePerformance.formatOPS(results);
+
+        return cache;
+    })
+    .then(function taggedCacheGet(cache) {
+        process.stdout.write(`\rTaggedCache [get]         `);
+        const valuesToGet = generateKV();
+
+        const results = measurePerformance(() => {
+            for (let pair of valuesToGet) {
+                cache.get(pair[0]);
+            }
+        });
+
+        benchResults["Tagged Cache (w/o tags)"].get = measurePerformance.formatOPS(results);
+
+        return cache;
+    })
+    .then(function taggedCacheMultiGet(cache) {
+        process.stdout.write(`\rTaggedCache [multi-get]    `);
+        const valuesToGet = Object.getOwnPropertyNames(generateKV(true));
+
+        const results = measurePerformance(() => {
+            cache.mget(valuesToGet);
+        });
+
+        benchResults["Tagged Cache (w/o tags)"].mget = measurePerformance.formatOPS(results);
+        return cache;
+    })
+    .then(function taggedCacheHas(cache) {
+        process.stdout.write(`\rTaggedCache [has]          `);
+        const valuesToSet = generateKV();
+
+        const results = measurePerformance(() => {
+            for (let pair of valuesToSet) {
+                cache.has(pair[0]);
+            }
+        });
+
+        benchResults["Tagged Cache (w/o tags)"].has = measurePerformance.formatOPS(results);
+
+        return cache;
+    })
+    .then(function taggedCacheMultiHas(cache) {
+        process.stdout.write(`\rTaggedCache [multi-has]     `);
+        const valuesToCheck = Object.getOwnPropertyNames(generateKV(true));
+
+        const results = measurePerformance(() => {
+            cache.mhas(valuesToCheck);
+        });
+
+        benchResults["Tagged Cache (w/o tags)"].mhas = measurePerformance.formatOPS(results);
+
+        disableTimestampCache();
+        cache.flush();
+    })
+    .then(() => {
+        enableTimestampCache();
+        return populateTaggedCache(true);
     })
     .then(function taggedCacheSet(cache) {
         process.stdout.write(`\rTaggedCache [set]         `);
@@ -326,12 +491,12 @@ Promise.resolve()
             }
         });
 
-        benchResults["node-cache"].has = measurePerformance.formatOPS(results);
+        benchResults["cache-base"].has = measurePerformance.formatOPS(results);
 
         return cache;
     })
     .then(function taggedCacheMultiHas(cache) {
-        benchResults["node-cache"].mhas = "none";
+        benchResults["cache-base"].mhas = "none";
 
         return cache;
     })

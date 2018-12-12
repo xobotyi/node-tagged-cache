@@ -13,7 +13,6 @@ const timestamp_1 = require("./timestamp");
 const Crawler_1 = require("./Crawler");
 const defaultOptions = {
     defaultTTL: 600000,
-    emitErrorOnMissing: false,
     cleanupInterval: 60000,
 };
 class TaggedCache {

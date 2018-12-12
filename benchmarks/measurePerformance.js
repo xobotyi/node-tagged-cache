@@ -14,5 +14,5 @@ module.exports = function measurePerformance(fn, rounds) {
 };
 
 module.exports.formatOPS = function formatOPS(results) {
-    return String(~~results.ops).replace(/\d(?=(\d{3})+$)/g, "$& ");
+    return String(~~results.ops).replace(/\d(?=(\d{3})+$)/g, "$&,");
 };
