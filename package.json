@@ -1,6 +1,6 @@
 {
   "name": "node-tagged-cache",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "main": "dist/TaggedCache.js",
   "repository": {
     "type": "git",
