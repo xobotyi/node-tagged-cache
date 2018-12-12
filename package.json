@@ -1,7 +1,7 @@
 {
   "name": "node-tagged-cache",
   "description": "In-memory, performance-targeted caching module with ttl and tagging support.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "main": "dist/TaggedCache.js",
   "repository": {
     "type": "git",
