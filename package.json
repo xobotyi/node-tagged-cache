@@ -41,13 +41,18 @@
       "post-commit": "git update-index -g"
     }
   },
-  "dependencies": {},
+  "dependencies": {
+    "kind-of": "^6.0.2"
+  },
   "devDependencies": {
     "@types/jest": "^23.3.10",
     "@types/node": "^10.12.12",
     "cache-base": "^4.0.0",
+    "clone": "^2.1.2",
+    "clone-deep": "^4.0.1",
     "husky": "^1.2.0",
     "jest": "^23.6.0",
+    "lodash.clonedeep": "^4.5.0",
     "node-cache": "^4.2.0",
     "prettier": "^1.15.3",
     "rimraf": "^2.6.2",

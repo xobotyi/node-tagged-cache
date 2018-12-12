@@ -22,7 +22,6 @@ describe("TaggedCache", () => {
             const optsKeys: string[] = Object.getOwnPropertyNames(cache.getOptions());
 
             expect(optsKeys.includes("defaultTTL")).toBeTruthy();
-            expect(optsKeys.includes("emitErrorOnMissing")).toBeTruthy();
             expect(optsKeys.includes("cleanupInterval")).toBeTruthy();
         });
     });
