@@ -10,7 +10,7 @@
 ### Fast NodeJS in-memory caching with tagging
 Probably the fastest NodeJS caching system yet.  
 It is much like memcached or redis but provides you with ability to set tags for cache entries and drop them all together when you need it.  
-Note that this module does not clone stored arrays/objects and operates only with their refs.
+>Note: **this module does not clone stored arrays/objects and operates only with their refs.**
 
 ### Performance
 As the entries store `node-tagged-cache` uses [Map](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map) due to it's total overperforming regular objects.
@@ -30,12 +30,12 @@ And, furthermore, below you can see  performance comparision with two most popul
 
 module | set | mset | get | mget | has | mhas
 -------|-----|------|-----|------|-----|-----
-Tagged Cache (w/o timestamp) (w/o tags) | '1,179,245' | '2,463,054' | '1,510,574' | '2,717,391' | '1,533,742' | '2,392,344' 
-Tagged Cache (w/o timestamp) | '1,302,083' | '2,392,344' | '1,146,788' | '1,298,701' | '1,070,663' | '1,388,888'
-Tagged Cache (w/o tags) | '2,631,578' | '3,333,333' | '5,208,333' | '2,906,976' | '5,494,505' | '3,355,704'
-Tagged Cache | '2,976,190' | '3,378,378' | '1,845,018' | '1,436,781' | '1,976,284' | '1,529,051'
-node-cache | '284,900' | 'none' | '1,312,335' | '1,098,901' | 'none' | 'none'
-cache-base | '507,614' | 'none' | '892,857' | 'none' | '5,319,148' | 'none'
+Tagged Cache (w/o timestamp) (w/o tags) | 1,179,245 | 2,463,054 | 1,510,574 | 2,717,391 | 1,533,742 | 2,392,344 
+Tagged Cache (w/o timestamp) | 1,302,083 | 2,392,344 | 1,146,788 | 1,298,701 | 1,070,663 | 1,388,888
+Tagged Cache (w/o tags) | 2,631,578 | 3,333,333 | 5,208,333 | 2,906,976 | 5,494,505 | 3,355,704
+Tagged Cache | 2,976,190 | 3,378,378 | 1,845,018 | 1,436,781 | 1,976,284 | 1,529,051
+node-cache | 284,900 | none | 1,312,335 | 1,098,901 | none | none
+cache-base | 507,614 | none | 892,857 | none | 5,319,148 | none
  
 
 You can simply run performance tests on your own machine.
