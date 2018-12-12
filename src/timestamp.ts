@@ -9,7 +9,7 @@
 import Timeout = NodeJS.Timeout;
 
 export default function(): number {
-  return _timestampSyncEnabled ? _timestamp : Date.now();
+    return _timestampSyncEnabled ? _timestamp : Date.now();
 }
 
 let _timestamp: number = 0;
@@ -18,43 +18,43 @@ let _timestampSyncEnabled: boolean = false;
 let _timestampSyncTimeout: Timeout | undefined;
 
 function timestampSync(): void {
-  _timestamp = Date.now();
+    _timestamp = Date.now();
 
-  if (_timestampSyncEnabled) {
-    _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
-    _timestampSyncTimeout = setTimeout(timestampSync, _timestampSyncInterval);
-  }
+    if (_timestampSyncEnabled) {
+        _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
+        _timestampSyncTimeout = setTimeout(timestampSync, _timestampSyncInterval);
+    }
 }
 
 timestampSync();
 
 export function disableTimestampCache(): void {
-  _timestampSyncEnabled = false;
-  _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
-  _timestampSyncTimeout = undefined;
+    _timestampSyncEnabled = false;
+    _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
+    _timestampSyncTimeout = undefined;
 }
 
 export function enableTimestampCache(): void {
-  _timestampSyncEnabled = true;
-  _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
+    _timestampSyncEnabled = true;
+    _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
 
-  timestampSync();
+    timestampSync();
 }
 
 export function setTimestampCacheTTL(interval: number): void {
-  if (interval <= 0) {
-    throw new Error("interval has to be greater than 0");
-  }
+    if (interval <= 0) {
+        throw new Error("interval has to be greater than 0");
+    }
 
-  if (interval === _timestampSyncInterval) {
-    return;
-  }
+    if (interval === _timestampSyncInterval) {
+        return;
+    }
 
-  _timestampSyncInterval = interval;
-  _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
-  _timestampSyncEnabled && timestampSync();
+    _timestampSyncInterval = interval;
+    _timestampSyncTimeout && clearTimeout(_timestampSyncTimeout);
+    _timestampSyncEnabled && timestampSync();
 }
 
 export function getTimestampCacheTTL(): number {
-  return _timestampSyncInterval;
+    return _timestampSyncInterval;
 }

@@ -14,7 +14,7 @@ const Crawler_1 = require("./Crawler");
 const defaultOptions = {
     defaultTTL: 600000,
     emitErrorOnMissing: false,
-    cleanupInterval: 60000
+    cleanupInterval: 60000,
 };
 class TaggedCache {
     constructor(options = {}) {
@@ -57,7 +57,7 @@ class TaggedCache {
             iat,
             ttl,
             exp: ttl && iat + ttl,
-            tags: !tags.length ? null : this.tags.mget(tags)
+            tags: !tags.length ? null : this.tags.mget(tags),
         };
         this.storage.set(key, entry);
         this.storage.size && !this.crawler.active && this.crawler.start();
@@ -72,7 +72,7 @@ class TaggedCache {
                 iat,
                 ttl,
                 exp: ttl && iat + ttl,
-                tags: !tags.length ? null : this.tags.mget(tags)
+                tags: !tags.length ? null : this.tags.mget(tags),
             };
             this.storage.set(key, entry);
         }
@@ -135,8 +135,7 @@ class TaggedCache {
         return this;
     }
     validate(entry, now = 0) {
-        if ((entry.exp && (now || timestamp_1.default()) >= entry.exp) ||
-            (entry.tags && !this.tags.validate(entry.tags))) {
+        if ((entry.exp && (now || timestamp_1.default()) >= entry.exp) || (entry.tags && !this.tags.validate(entry.tags))) {
             this.storage.delete(entry.key);
             !this.storage.size && this.crawler.active && this.crawler.stop();
             return false;
@@ -155,7 +154,7 @@ class TaggedCache {
         return {
             items: this.storage.size,
             time: timestamp_1.default(),
-            uptime: Date.now() - this.createdAt
+            uptime: Date.now() - this.createdAt,
         };
     }
 }

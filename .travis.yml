@@ -1,0 +1,20 @@
+language: node_js
+node_js:
+  - "11"
+
+sudo: true
+addons:
+  chrome: stable
+
+matrix:
+  fast_finish: true
+
+cache:
+  directories:
+    - "node_modules"
+
+script:
+  - npm run test:coverage
+
+after_success:
+  - npm run push-codacy-coverage
