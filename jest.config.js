@@ -1,15 +1,19 @@
 module.exports = {
     testEnvironment: "node",
 
-    coverageDirectory: "coverage",
-    roots:             [
+    coverageDirectory:   "coverage",
+    collectCoverageFrom: [
+        "<rootDir>/src/**/*.ts",
+    ],
+    roots:               [
         "<rootDir>/src/",
         "<rootDir>/tests/",
     ],
-    transform:         {
+    transform:           {
         "\\.tsx?$": "ts-jest",
     },
-    testMatch:         [
+
+    testMatch: [
         "<rootDir>/tests/**/*.spec.ts",
     ],
 
