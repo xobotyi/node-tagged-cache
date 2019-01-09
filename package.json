@@ -2,7 +2,8 @@
   "name": "node-tagged-cache",
   "description": "In-memory, performance-targeted caching module with ttl and tagging support.",
   "version": "0.0.4",
-  "main": "dist/TaggedCache.js",
+  "main": "dist/index.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/xobotyi/node-tagged-cache.git"
