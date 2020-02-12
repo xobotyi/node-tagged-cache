@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "@types/jest": "^23.3.10",
-    "@types/node": "^10.12.12",
+    "@types/node": "^13.7.1",
     "cache-base": "^4.0.0",
     "clone": "^2.1.2",
     "clone-deep": "^4.0.1",
