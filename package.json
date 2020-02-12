@@ -54,7 +54,7 @@
     "husky": "^1.2.0",
     "jest": "^23.6.0",
     "lodash.clonedeep": "^4.5.0",
-    "node-cache": "^4.2.0",
+    "node-cache": "^5.1.0",
     "prettier": "^1.15.3",
     "rimraf": "^3.0.2",
     "ts-jest": "^23.10.5",
