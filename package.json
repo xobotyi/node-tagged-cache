@@ -46,7 +46,7 @@
     "kind-of": "^6.0.2"
   },
   "devDependencies": {
-    "@types/jest": "^25.1.2",
+    "@types/jest": "^26.0.0",
     "@types/node": "^14.0.1",
     "cache-base": "^4.0.0",
     "clone": "^2.1.2",
