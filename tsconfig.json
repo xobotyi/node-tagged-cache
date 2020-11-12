@@ -1,21 +1,15 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "target": "es2016",
-
-    "sourceMap": false,
-    "removeComments": true,
-
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "strictNullChecks": true,
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "target": "ES2017",
 
     "declaration": true,
-    "declarationDir": "./types",
-
-    "outDir": "./dist"
+    "sourceMap": true,
+    "strict": true,
+    "outDir": "./dist",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": [
     "src/**/*.ts"

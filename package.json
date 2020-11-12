@@ -1,6 +1,6 @@
 {
   "name": "node-tagged-cache",
-  "description": "In-memory, performance-targeted caching module with ttl and tagging support.",
+  "description": "In-memory, performance-targeted caching with tagging support.",
   "version": "0.0.4",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -10,6 +10,9 @@
   },
   "bugs": {
     "url": "https://github.com/xobotyi/node-tagged-cache/issues"
+  },
+  "engines": {
+    "node": ">=10"
   },
   "homepage": "https://github.com/xobotyi/node-tagged-cache",
   "author": "Anton Zinovyev",
@@ -26,39 +29,31 @@
     "local"
   ],
   "scripts": {
-    "build": "rimraf dist/ && tsc",
-    "test": "jest",
+    "lint": "eslint ./**/*.{ts,tsx,js,jsx}",
+    "lint:fix": "yarn lint --fix",
+    "lint:types": "tsc --noEmit",
+    "cleanup": "rimraf ./dist",
+    "test": "jest --coverage=false",
     "test:coverage": "jest --coverage",
-    "format:fix": "prettier --write src/**/*.ts benchmarks/**/*.js",
-    "format:list": "prettier -l src/**/*.ts benchmarks/**/*.js",
-    "preversion": "npm run test && npm run build && npm run format:fix",
-    "postversion": "git push && git push --tags",
-    "prepublishOnly": "npm run test && npm run build",
     "push-codacy-coverage": "cat ./coverage/lcov.info | codacy-coverage -p ."
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run format:fix && npm run build && git add .",
-      "post-commit": "git update-index -g"
-    }
-  },
   "dependencies": {
-    "kind-of": "^6.0.2"
+    "rfdc": "^1.1.4"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.0",
-    "@types/node": "^14.0.1",
-    "cache-base": "^4.0.0",
-    "clone": "^2.1.2",
-    "clone-deep": "^4.0.1",
-    "husky": "^4.2.2",
-    "jest": "^23.6.0",
-    "lodash.clonedeep": "^4.5.0",
-    "node-cache": "^5.1.0",
-    "prettier": "^2.0.1",
+    "@types/jest": "^26.0.15",
+    "@types/node": "^14.14.6",
+    "@types/rfdc": "^1.1.0",
+    "@typescript-eslint/eslint-plugin": "^4.6.1",
+    "@typescript-eslint/parser": "^4.6.1",
+    "eslint": "^7.13.0",
+    "eslint-config-prettier": "^6.15.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "jest": "^26.6.3",
+    "prettier": "^2.1.2",
     "rimraf": "^3.0.2",
-    "ts-jest": "^23.10.5",
+    "ts-jest": "^26.4.4",
     "typescript": "^4.0.5"
-  },
-  "webSocketDebuggerUrl": "ws://127.0.0.1:9229/d270c0dd-6de4-4ced-ae66-7469a15f1d97"
+  }
 }
