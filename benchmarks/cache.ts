@@ -1,23 +1,37 @@
 import {Suite} from 'benchmark';
 import NodeCache from 'node-cache';
+import LRU from 'lru-cache';
+// eslint-disable-next-line node/no-unpublished-import
 import {Cache} from '../src';
 import {mediumDataItem} from './fuxtures';
 
 const storeVal = mediumDataItem;
 
-let i = 0;
-const keysPool = ['qui', 'id', 'eu', 'labore', 'dolor', 'in', 'minim'];
+const keys = Array(10000)
+  .fill(1)
+  .map(() => String(Math.floor(Math.random() * 10000000)));
+const keysAmount = keys.length;
+let keysIndex = 0;
+
+function getKey(): string {
+  keysIndex = keysIndex++ % keysAmount;
+  return keys[keysIndex];
+}
 
 const nodeTaggedCache = new Cache({
-  capacity: Infinity,
+  capacity: 1000,
   defaultTTL: 3600,
-  clone: true,
+  clone: false,
 });
 const nodeCache = new NodeCache({
-  maxKeys: -1,
+  maxKeys: 1000,
   stdTTL: 3600,
-  useClones: true,
+  useClones: false,
   deleteOnExpire: true,
+});
+const lruCache = new LRU({
+  max: 1000,
+  maxAge: 3600000,
 });
 
 new Suite('set', {
@@ -32,10 +46,13 @@ new Suite('set', {
   },
 })
   .add('#node-tagged-cache', () => {
-    nodeTaggedCache.set(keysPool[i++ % 7], storeVal);
+    nodeTaggedCache.set(getKey(), storeVal);
   })
   .add('#node-cache', () => {
-    nodeCache.set(keysPool[i++ % 7], storeVal);
+    nodeCache.set(getKey(), storeVal);
+  })
+  .add('#lru-cache', () => {
+    lruCache.set(getKey(), storeVal);
   })
   .run();
 
@@ -52,31 +69,37 @@ new Suite('mset', {
 })
   .add('#node-tagged-cache', () => {
     nodeTaggedCache.mset([
-      {key: keysPool[i++ % 7], value: storeVal},
-      {key: keysPool[i++ % 7], value: storeVal},
-      {key: keysPool[i++ % 7], value: storeVal},
-      {key: keysPool[i++ % 7], value: storeVal},
+      {key: getKey(), value: storeVal},
+      {key: getKey(), value: storeVal},
+      {key: getKey(), value: storeVal},
+      {key: getKey(), value: storeVal},
     ]);
   })
   .add('#node-cache', () => {
     nodeCache.mset([
-      {key: keysPool[i++ % 7], val: storeVal},
-      {key: keysPool[i++ % 7], val: storeVal},
-      {key: keysPool[i++ % 7], val: storeVal},
-      {key: keysPool[i++ % 7], val: storeVal},
+      {key: getKey(), val: storeVal},
+      {key: getKey(), val: storeVal},
+      {key: getKey(), val: storeVal},
+      {key: getKey(), val: storeVal},
     ]);
   })
   .add('#node-tagged-cache (consequtive calls)', () => {
-    nodeTaggedCache.set(keysPool[i++ % 7], storeVal);
-    nodeTaggedCache.set(keysPool[i++ % 7], storeVal);
-    nodeTaggedCache.set(keysPool[i++ % 7], storeVal);
-    nodeTaggedCache.set(keysPool[i++ % 7], storeVal);
+    nodeTaggedCache.set(getKey(), storeVal);
+    nodeTaggedCache.set(getKey(), storeVal);
+    nodeTaggedCache.set(getKey(), storeVal);
+    nodeTaggedCache.set(getKey(), storeVal);
   })
   .add('#node-cache (consequtive calls)', () => {
-    nodeCache.set(keysPool[i++ % 7], storeVal);
-    nodeCache.set(keysPool[i++ % 7], storeVal);
-    nodeCache.set(keysPool[i++ % 7], storeVal);
-    nodeCache.set(keysPool[i++ % 7], storeVal);
+    nodeCache.set(getKey(), storeVal);
+    nodeCache.set(getKey(), storeVal);
+    nodeCache.set(getKey(), storeVal);
+    nodeCache.set(getKey(), storeVal);
+  })
+  .add('#lru-cache (consequtive calls)', () => {
+    lruCache.set(getKey(), storeVal);
+    lruCache.set(getKey(), storeVal);
+    lruCache.set(getKey(), storeVal);
+    lruCache.set(getKey(), storeVal);
   })
   .run();
 
@@ -91,15 +114,19 @@ new Suite('get', {
     console.log('Fastest is ' + ev.currentTarget.filter('fastest').map('name') + '\n');
   },
 })
-  .add('#node-tagged-cache', () => {
-    nodeTaggedCache.get(keysPool[i++ % 7]);
+  .add('#node-tagged-cache', async () => {
+    nodeTaggedCache.get(getKey());
     nodeTaggedCache.get('someNonexistentKey');
   })
-  .add('#node-cache', () => {
-    nodeCache.get(keysPool[i++ % 7]);
+  .add('#node-cache', async () => {
+    nodeCache.get(getKey());
     nodeCache.get('someNonexistentKey');
   })
-  .run();
+  .add('#lru-cache', async () => {
+    lruCache.get(getKey());
+    lruCache.get('someNonexistentKey');
+  })
+  .run({async: true});
 
 new Suite('mget', {
   onStart: (ev: any) => {
@@ -113,35 +140,30 @@ new Suite('mget', {
   },
 })
   .add('#node-tagged-cache', () => {
-    nodeTaggedCache.mget([
-      keysPool[i++ % 7],
-      keysPool[i++ % 7],
-      'someNonexistentKey',
-      keysPool[i++ % 7],
-      keysPool[i++ % 7],
-    ]);
+    nodeTaggedCache.mget([getKey(), getKey(), 'someNonexistentKey', getKey(), getKey()]);
   })
   .add('#node-cache', () => {
-    nodeCache.mget([
-      keysPool[i++ % 7],
-      keysPool[i++ % 7],
-      'someNonexistentKey',
-      keysPool[i++ % 7],
-      keysPool[i++ % 7],
-    ]);
+    nodeCache.mget([getKey(), getKey(), 'someNonexistentKey', getKey(), getKey()]);
   })
   .add('#node-tagged-cache (consequtive calls)', () => {
-    nodeTaggedCache.get(keysPool[i++ % 7]);
-    nodeTaggedCache.get(keysPool[i++ % 7]);
+    nodeTaggedCache.get(getKey());
+    nodeTaggedCache.get(getKey());
     nodeTaggedCache.get('someNonexistentKey');
-    nodeTaggedCache.get(keysPool[i++ % 7]);
-    nodeTaggedCache.get(keysPool[i++ % 7]);
+    nodeTaggedCache.get(getKey());
+    nodeTaggedCache.get(getKey());
   })
   .add('#node-cache (consequtive calls)', () => {
-    nodeCache.get(keysPool[i++ % 7]);
-    nodeCache.get(keysPool[i++ % 7]);
+    nodeCache.get(getKey());
+    nodeCache.get(getKey());
     nodeCache.get('someNonexistentKey');
-    nodeCache.get(keysPool[i++ % 7]);
-    nodeCache.get(keysPool[i++ % 7]);
+    nodeCache.get(getKey());
+    nodeCache.get(getKey());
+  })
+  .add('#node-cache (consequtive calls)', () => {
+    lruCache.get(getKey());
+    lruCache.get(getKey());
+    lruCache.get('someNonexistentKey');
+    lruCache.get(getKey());
+    lruCache.get(getKey());
   })
   .run();

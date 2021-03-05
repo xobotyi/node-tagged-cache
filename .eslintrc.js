@@ -36,5 +36,6 @@ module.exports = {
         tryExtensions: ['.js', '.json', '.node', '.ts'],
       },
     ],
+    '@typescript-eslint/no-explicit-any': 'off',
   },
 };

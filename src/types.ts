@@ -1,3 +1,32 @@
+export interface IStorage<
+  K extends string | number = string | number,
+  V extends Exclude<any, undefined> = Exclude<any, undefined>
+> {
+  get(key: K | string | number): V | Exclude<any, undefined> | undefined;
+
+  mget<Keys extends K | string | number>(
+    keys: Keys[],
+  ): Record<Keys, V | Exclude<any, undefined> | undefined>;
+
+  set(key: K | string | number, value: V | Exclude<any, undefined>): void;
+
+  mset(kv: Record<K | string | number, V | Exclude<any, undefined>>): void;
+
+  delete(key: K | string | number): boolean;
+
+  has(key: K | string | number): boolean;
+
+  clear(): void;
+
+  values(): IterableIterator<V | Exclude<any, undefined>> | Array<V | Exclude<any, undefined>>;
+
+  keys(): IterableIterator<K | string | number> | Array<K | string | number>;
+
+  entries():
+    | IterableIterator<[K | string | number, V | Exclude<any, undefined>]>
+    | Array<[K | string | number, V | Exclude<any, undefined>]>;
+}
+
 export interface ICacheOptions {
   /**
    * Time in seconds entry will be treated as fresh.
