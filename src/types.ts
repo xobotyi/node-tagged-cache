@@ -1,32 +1,3 @@
-export interface IStorage<
-  K extends string | number = string | number,
-  V extends Exclude<any, undefined> = Exclude<any, undefined>
-> {
-  get(key: K | string | number): V | Exclude<any, undefined> | undefined;
-
-  mget<Keys extends K | string | number>(
-    keys: Keys[],
-  ): Record<Keys, V | Exclude<any, undefined> | undefined>;
-
-  set(key: K | string | number, value: V | Exclude<any, undefined>): void;
-
-  mset(kv: Record<K | string | number, V | Exclude<any, undefined>>): void;
-
-  delete(key: K | string | number): boolean;
-
-  has(key: K | string | number): boolean;
-
-  clear(): void;
-
-  values(): IterableIterator<V | Exclude<any, undefined>> | Array<V | Exclude<any, undefined>>;
-
-  keys(): IterableIterator<K | string | number> | Array<K | string | number>;
-
-  entries():
-    | IterableIterator<[K | string | number, V | Exclude<any, undefined>]>
-    | Array<[K | string | number, V | Exclude<any, undefined>]>;
-}
-
 export interface ICacheOptions {
   /**
    * Time in seconds entry will be treated as fresh.
@@ -43,9 +14,24 @@ export interface ICacheOptions {
   garbageCollectInterval: number;
 
   /**
-   * If _`true`_ every stored value will be deeply cloned. Otherwise it will be stored by reference
+   * If _`true`_ every stored value will be deeply cloned.
+   * <br/>Otherwise, if `shallowCopy` is also set to false, values will be stored by reference.
+   * <br/>Overrides `shallowCopy` option, but overridden by `copyFn` option.
    */
-  clone: boolean;
+  deepCopy: boolean;
+
+  /**
+   * if _`true`_ every stored value will be shallowly cloned.
+   * <br/>Otherwise, if `deepCopy` is also set to false, values will be stored by reference.
+   * <br/>`deepCopy` and `copyFn` is overrides this option.
+   */
+  shallowCopy: boolean;
+
+  /**
+   * If set this function will be used to copy value during value storing and retrieving.
+   * <br/>Overrides `deepCopy` and `shallowCopy` option.
+   */
+  copyFn: <T>(val: T) => T;
 
   /**
    * Amount of keys that can be stored.
@@ -54,75 +40,36 @@ export interface ICacheOptions {
   capacity: number;
 
   /**
-   * Function that used to retrieve time in seconds.
+   * Strategy to handle cache overflow
    */
-  getSeconds: () => number;
+  capacityOverflowStrategy: ICacheOverflowStrategyCtor;
 }
 
-export interface ICacheStats {
-  capacity: number;
-  keys: number;
-  hits: number;
-  misses: number;
-  stores: number;
-  replaces: number;
-  writes: number;
-  deletes: number;
-  clears: number;
-  uptime: number;
+export interface ICacheEntry<V extends Exclude<any, undefined> = Exclude<any, undefined>> {
+  key: string;
+  val: V;
+  iat: number;
+  ttl: number;
+  exp: number;
 }
 
-export interface ICacheEntry<
-  K extends string | number = string | number,
+export interface ICacheOverflowStrategyCtor<
   V extends Exclude<any, undefined> = Exclude<any, undefined>
 > {
-  k: K;
-  v: V;
-  s: number;
-  t: number;
-  e: number;
+  new (capacity: number, removeCacheEntry: (key: string) => boolean): ICacheOverflowStrategy<V>;
 }
 
-export interface ICache<
-  Keys extends string | number = string | number,
-  Values extends Exclude<any, undefined> = Exclude<any, undefined>
+export interface ICacheOverflowStrategy<
+  V extends Exclude<any, undefined> = Exclude<any, undefined>
 > {
-  size: number;
-  capacity: number;
-  totalCapacity: number;
-  stats: ICacheStats;
-  options: ICacheOptions;
-  garbageCollectionEnabled: boolean;
+  onGet: (key: string, value: V) => void;
 
-  get(key: Keys): Values | undefined;
+  onSet: (key: string, value: V) => void;
 
-  mget<K extends Keys = Keys>(keys: K[]): Record<K, Values | undefined>;
-
-  set(key: Keys, value: Values, ttl?: ICacheOptions['defaultTTL']): void;
-
-  mset(kv: Record<Keys, Values>, ttl?: ICacheOptions['defaultTTL']): void;
-
-  add(key: Keys, value: Values, ttl?: ICacheOptions['defaultTTL']): boolean;
-
-  madd<K extends Keys = Keys>(
-    kv: Record<K, Values>,
-    ttl?: ICacheOptions['defaultTTL'],
-  ): Record<K, boolean>;
-
-  replace(key: Keys, value: Values, ttl?: ICacheOptions['defaultTTL']): boolean;
-
-  mreplace<K extends Keys = Keys>(
-    kv: Record<K, Values>,
-    ttl?: ICacheOptions['defaultTTL'],
-  ): Record<K, boolean>;
-
-  del(key: Keys): boolean;
-
-  mdel<K extends Keys = Keys>(keys: K[]): Record<K, boolean>;
-
-  has(key: Keys): boolean;
-
-  keys(): Keys[];
+  /**
+   * @param key Key of deleted entry.
+   * @param value Value of deleted entry.
+   * @param byUser Whether entry has been deleted by `Cache.del` call.
+   */
+  onDelete: (key: string, value: V, byUser: boolean) => void;
 }
-
-export type ITaggedCache = ICache;

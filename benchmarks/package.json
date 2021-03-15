@@ -28,6 +28,7 @@
     "@types/lru-cache": "^5.1.0",
     "@types/node": "^14.14.31",
     "@types/node-cache": "^4.2.5",
-    "@types/rfdc": "^1.1.0"
+    "@types/rfdc": "^1.1.0",
+    "ts-node-dev": "^1.1.6"
   }
 }

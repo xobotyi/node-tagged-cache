@@ -1,13 +1,15 @@
-import {Suite} from 'benchmark';
 import NodeCache from 'node-cache';
 import LRU from 'lru-cache';
 // eslint-disable-next-line node/no-unpublished-import
-import {Cache} from '../src';
+import {Cache, OldCache} from '../src';
 import {mediumDataItem} from './fuxtures';
+import {runSuites} from './util/runSuites';
+import {getSuite} from './util/getSuite';
+import {FIFOOverflowStrategy} from '../src/overflow-strategy/FIFOOverflowStrategy';
 
 const storeVal = mediumDataItem;
 
-const keys = Array(10000)
+const keys = Array(100000)
   .fill(1)
   .map(() => String(Math.floor(Math.random() * 10000000)));
 const keysAmount = keys.length;
@@ -19,151 +21,62 @@ function getKey(): string {
 }
 
 const nodeTaggedCache = new Cache({
-  capacity: 1000,
+  capacity: 10000,
+  defaultTTL: 3600,
+  deepCopy: false,
+  shallowCopy: false,
+});
+const nodeTaggedCacheFIFO = new Cache({
+  capacity: 10000,
+  capacityOverflowStrategy: FIFOOverflowStrategy,
+  defaultTTL: 3600,
+  deepCopy: false,
+  shallowCopy: false,
+});
+const nodeTaggedCacheOld = new OldCache({
+  capacity: 10000,
   defaultTTL: 3600,
   clone: false,
 });
 const nodeCache = new NodeCache({
-  maxKeys: 1000,
+  maxKeys: 10000,
   stdTTL: 3600,
   useClones: false,
   deleteOnExpire: true,
 });
 const lruCache = new LRU({
-  max: 1000,
+  max: 10000,
   maxAge: 3600000,
 });
 
-new Suite('set', {
-  onStart: (ev: any) => {
-    console.log(String(ev.currentTarget.name));
-  },
-  onCycle: (ev: any) => {
-    console.log(' ' + String(ev.target));
-  },
-  onComplete: (ev: any) => {
-    console.log('Fastest is ' + ev.currentTarget.filter('fastest').map('name') + '\n');
-  },
-})
-  .add('#node-tagged-cache', () => {
-    nodeTaggedCache.set(getKey(), storeVal);
-  })
-  .add('#node-cache', () => {
-    nodeCache.set(getKey(), storeVal);
-  })
-  .add('#lru-cache', () => {
-    lruCache.set(getKey(), storeVal);
-  })
-  .run();
+(async () => {
+  await runSuites([
+    getSuite('set')
+      .add('#node-tagged-cache (Old)', () => nodeTaggedCacheOld.set(getKey(), storeVal))
+      .add('#node-tagged-cache', () => nodeTaggedCache.set(getKey(), storeVal))
+      .add('#node-tagged-cache (fifo)', () => nodeTaggedCacheFIFO.set(getKey(), storeVal))
+      .add('#node-cache', () => nodeCache.set(getKey(), storeVal))
+      .add('#lru-cache', () => lruCache.set(getKey(), storeVal)),
 
-new Suite('mset', {
-  onStart: (ev: any) => {
-    console.log(String(ev.currentTarget.name));
-  },
-  onCycle: (ev: any) => {
-    console.log(' ' + String(ev.target));
-  },
-  onComplete: (ev: any) => {
-    console.log('Fastest is ' + ev.currentTarget.filter('fastest').map('name') + '\n');
-  },
-})
-  .add('#node-tagged-cache', () => {
-    nodeTaggedCache.mset([
-      {key: getKey(), value: storeVal},
-      {key: getKey(), value: storeVal},
-      {key: getKey(), value: storeVal},
-      {key: getKey(), value: storeVal},
-    ]);
-  })
-  .add('#node-cache', () => {
-    nodeCache.mset([
-      {key: getKey(), val: storeVal},
-      {key: getKey(), val: storeVal},
-      {key: getKey(), val: storeVal},
-      {key: getKey(), val: storeVal},
-    ]);
-  })
-  .add('#node-tagged-cache (consequtive calls)', () => {
-    nodeTaggedCache.set(getKey(), storeVal);
-    nodeTaggedCache.set(getKey(), storeVal);
-    nodeTaggedCache.set(getKey(), storeVal);
-    nodeTaggedCache.set(getKey(), storeVal);
-  })
-  .add('#node-cache (consequtive calls)', () => {
-    nodeCache.set(getKey(), storeVal);
-    nodeCache.set(getKey(), storeVal);
-    nodeCache.set(getKey(), storeVal);
-    nodeCache.set(getKey(), storeVal);
-  })
-  .add('#lru-cache (consequtive calls)', () => {
-    lruCache.set(getKey(), storeVal);
-    lruCache.set(getKey(), storeVal);
-    lruCache.set(getKey(), storeVal);
-    lruCache.set(getKey(), storeVal);
-  })
-  .run();
+    getSuite('get')
+      .add('#node-tagged-cache (Old)', () => nodeTaggedCacheOld.get(getKey()))
+      .add('#node-tagged-cache', () => nodeTaggedCache.get(getKey()))
+      .add('#node-tagged-cache (fifo)', () => nodeTaggedCacheFIFO.get(getKey()))
+      .add('#node-cache', () => nodeCache.get(getKey()))
+      .add('#lru-cache', () => lruCache.get(getKey())),
 
-new Suite('get', {
-  onStart: (ev: any) => {
-    console.log(String(ev.currentTarget.name));
-  },
-  onCycle: (ev: any) => {
-    console.log(' ' + String(ev.target));
-  },
-  onComplete: (ev: any) => {
-    console.log('Fastest is ' + ev.currentTarget.filter('fastest').map('name') + '\n');
-  },
-})
-  .add('#node-tagged-cache', async () => {
-    nodeTaggedCache.get(getKey());
-    nodeTaggedCache.get('someNonexistentKey');
-  })
-  .add('#node-cache', async () => {
-    nodeCache.get(getKey());
-    nodeCache.get('someNonexistentKey');
-  })
-  .add('#lru-cache', async () => {
-    lruCache.get(getKey());
-    lruCache.get('someNonexistentKey');
-  })
-  .run({async: true});
+    getSuite('has')
+      .add('#node-tagged-cache (Old)', () => nodeTaggedCacheOld.has(getKey()))
+      .add('#node-tagged-cache', () => nodeTaggedCache.has(getKey()))
+      .add('#node-tagged-cache (fifo)', () => nodeTaggedCacheFIFO.has(getKey()))
+      .add('#node-cache', () => nodeCache.has(getKey()))
+      .add('#lru-cache', () => lruCache.has(getKey())),
 
-new Suite('mget', {
-  onStart: (ev: any) => {
-    console.log(String(ev.currentTarget.name));
-  },
-  onCycle: (ev: any) => {
-    console.log(' ' + String(ev.target));
-  },
-  onComplete: (ev: any) => {
-    console.log('Fastest is ' + ev.currentTarget.filter('fastest').map('name') + '\n');
-  },
-})
-  .add('#node-tagged-cache', () => {
-    nodeTaggedCache.mget([getKey(), getKey(), 'someNonexistentKey', getKey(), getKey()]);
-  })
-  .add('#node-cache', () => {
-    nodeCache.mget([getKey(), getKey(), 'someNonexistentKey', getKey(), getKey()]);
-  })
-  .add('#node-tagged-cache (consequtive calls)', () => {
-    nodeTaggedCache.get(getKey());
-    nodeTaggedCache.get(getKey());
-    nodeTaggedCache.get('someNonexistentKey');
-    nodeTaggedCache.get(getKey());
-    nodeTaggedCache.get(getKey());
-  })
-  .add('#node-cache (consequtive calls)', () => {
-    nodeCache.get(getKey());
-    nodeCache.get(getKey());
-    nodeCache.get('someNonexistentKey');
-    nodeCache.get(getKey());
-    nodeCache.get(getKey());
-  })
-  .add('#node-cache (consequtive calls)', () => {
-    lruCache.get(getKey());
-    lruCache.get(getKey());
-    lruCache.get('someNonexistentKey');
-    lruCache.get(getKey());
-    lruCache.get(getKey());
-  })
-  .run();
+    getSuite('delete')
+      .add('#node-tagged-cache (Old)', () => nodeTaggedCacheOld.del(getKey()))
+      .add('#node-tagged-cache', () => nodeTaggedCache.del(getKey()))
+      .add('#node-tagged-cache (fifo)', () => nodeTaggedCacheFIFO.del(getKey()))
+      .add('#node-cache', () => nodeCache.del(getKey()))
+      .add('#lru-cache', () => lruCache.del(getKey())),
+  ]);
+})();
