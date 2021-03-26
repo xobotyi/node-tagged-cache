@@ -41,7 +41,7 @@
     "rfdc": "^1.3.0"
   },
   "devDependencies": {
-    "@types/jest": "^26.0.21",
+    "@types/jest": "^26.0.22",
     "@types/node": "^14.14.35",
     "@types/rfdc": "^1.1.0",
     "@typescript-eslint/eslint-plugin": "^4.19.0",
